@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Socket.IO chat</title>
+    <style>
+      body { margin: 0; padding-bottom: 3rem; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; }
+
+      #form { background: rgba(0, 0, 0, 0.15); 
+        padding: 0.25rem; 
+        position: fixed; 
+        bottom: 0; left: 0; right: 0; 
+        display: flex; 
+        align-items: center;
+        flex-direction: column;
+        height: 4rem; 
+        box-sizing: border-box;
+         backdrop-filter: blur(10px); }
+      #input { border: none; padding: 0 1rem; border-radius: 2rem; margin: 0.25rem; }
+      #input:focus { outline: none; }
+      #form button { background: #333; border: none; padding: 0 1rem; margin: 0.25rem; border-radius: 3px; outline: none; color: #fff; }
+
+      #messages { list-style-type: none; margin: 0; padding: 0; }
+      #messages > li { padding: 0.5rem 1rem; }
+      #messages > li:nth-child(odd) { background: #efefef; }
+
+      .msg{
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+      }
+      .msg input{
+        height: 1.5rem;
+        flex: 1 1 auto;
+      }
+      .msg button{
+        /* flex:1 1 auto; */
+        height: 100%;
+      }
+      
+      .file {
+        display: flex;
+      }
+      button{
+        cursor: pointer;
+      }
+
+    </style>
+  </head>
+  <body>
+    <ul id="messages"></ul>
+    <form id="form" action="">
+      <div class="msg">
+        <input id="input" autocomplete="off" /><button>SendMessage</button>
+      </div>
+      
+      <div class="file">
+        <input type="file" class="a" name="test" multiple/>
+        <button class="axio">小文件提交</button>
+        <button class="bigfile">大文件提交(1M以上)</button>
+      </div>
+      
+      
+            
+    </form>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/axios/0.27.2/axios.js"></script>
+    <script>
+      var socket = io();
+
+      var messages = document.getElementById('messages');
+      var form = document.getElementById('form');
+      var input = document.getElementById('input');
+
+      let file = document.querySelector('.a')
+      let down = document.querySelector('.down')
+
+      //发送文字消息
+      form.addEventListener('submit', function(e) {
+        e.preventDefault();
+        if (input.value) {
+          socket.emit('chat message', input.value);
+          input.value = '';
+        }
+      });
+
+      //广播文字消息
+      socket.on('chat message', function(msg) {
+        var item = document.createElement('li');
+        item.textContent = msg;
+        messages.appendChild(item);
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      //广播文件链接
+      socket.on('file message', function(msg) {
+        
+        let { locName, name, size, type } = msg;
+        console.log(msg);
+        let newDoc = document.createElement('a')
+        let newLi = document.createElement('li')
+        newDoc.href = `/down?filename=${locName}`
+        newDoc.textContent = name
+        newLi.appendChild(newDoc)
+        messages.appendChild(newLi)
+        window.scrollTo(0, document.body.scrollHeight);
+      });
+
+      //websocket上传文件
+      function upFile(file) {
+        let fileList = [];
+        // console.dir(file.files);
+        [...file.files].forEach((value,index)=>{
+          let reader = new FileReader();
+          //数据读取完毕调用
+            reader.onload = function(event) {
+              // 文件里的文本会在这里被打印出来
+              // console.log(event.target.result)
+              console.log(value);
+              let {name,size,type} = value
+              socket.emit('file message', {file:event.target.result,name,size,type});
+
+            };
+        //虽然是同步代码，但是不能立刻执行返回读取数据结果，因此如果有使用读取数据需求，后续代码得写在onload回调函数里
+          reader.readAsArrayBuffer(value);
+        })
+      }
+
+      //小文件点击
+      document.querySelector('.axio').addEventListener('click',()=>{
+          upFile(file)
+          file.value = '';
+    }) 
+
+    function upBigFile() {
+      let chunkSize  = 1024*512 //512kb
+      let originFile = file.files[0]
+      console.log(originFile);
+      let point = originFile.name.lastIndexOf('.')
+      let fname = originFile.name.slice(0,point)
+      let fext = originFile.name.slice(point+1)
+      document.querySelector('.bigfile').textContent = '上传中。。。'
+      function tracking(index) {
+        let reader = new FileReader()
+        let start = index*chunkSize
+        if (start > originFile.size) {
+          index = 0;
+          document.querySelector('.bigfile').textContent = '大文件提交(1M以上)'
+
+          //HTTP请求
+          // axios.post('/merge',{fname,fext}).then((result) => {
+          //   console.log(result)
+          // }).catch((err) => {
+          //   console.log(err)
+          // });
+          //websocket请求
+          socket.emit('merge',{fname,fext})
+          return
+        }
+        let blob = originFile.slice(start,start + chunkSize)
+        let blobName = `${fname}/${index}.${fext}`
+        let blobFile = new File([blob],blobName)
+
+        reader.onload = function(event) {
+                // 文件里的文本会在这里被打印出来
+                // console.log(event.target.result)
+                console.log(event.target.result);
+                socket.emit('bigFile', {file:event.target.result,fname, index, fext});
+                tracking(index+1)
+              };
+          //虽然是同步代码，但是不能立刻执行返回读取数据结果，因此如果有使用读取数据需求，后续代码得写在onload回调函数里
+          reader.readAsArrayBuffer(blobFile);
+      }
+      tracking(0)
+    }
+
+
+    //大文件点击
+    document.querySelector('.bigfile').addEventListener('click',()=>{
+          upBigFile()
+          file.value = '';
+    }) 
+
+
+
+    socket.on("connect", () => {
+    const transport = socket.io.engine.transport.name; // 在大多数情况下，“轮询”
+    console.log("*",transport);
+  socket.io.engine.on("upgrade", () => {
+    const upgradedTransport = socket.io.engine.transport.name; // 在大多数情况下，“websocket”
+    console.log("*11",upgradedTransport);
+  });
+});
+
+    socket.io.on("error", (error) => {
+      console.log(error);
+  });
+
+  socket.io.on("reconnect_attempt", (attempt) => {
+    console.log('pre',attempt);
+});
+  socket.io.on("reconnect", (attempt) => {
+    console.log('after',attempt);
+});
+
+socket.io.on("reconnect_error", (error) => {
+  console.log('reconnect_error',error);
+  // ...
+});
+
+socket.io.on("reconnect_failed", () => {
+  console.log('reconnect_failed');
+  // ...
+});
+
+socket.io.on("ping", () => {
+  // ...
+  console.log('ping.........');
+});
+    </script>
+  </body>
+</html>
