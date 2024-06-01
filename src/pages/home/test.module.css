@@ -1,0 +1,23 @@
+/* 测试全局样式 */
+
+/* 无论是不是css module的导入方式，该样式全局生效，:root就是代表唯一的html标签 */
+:root {
+  --asdasdasda: #123456;
+}
+
+a {
+  -moz-transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  -webkit-transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  -ms-transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  transition: color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  border-bottom: dotted 1px;
+  color: #49bf9d;
+  text-decoration: none;
+}
+
+a:hover {
+  border-bottom-color: transparent;
+  /* 后者也用的话，后面覆盖前面的 */
+  color: #49bf9d !important;
+  text-decoration: none;
+}

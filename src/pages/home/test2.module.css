@@ -1,0 +1,25 @@
+/* 测试全局样式 */
+
+/* 无论是不是css module的导入方式，该样式全局生效，:root就是代表唯一的html标签 */
+/* 因此css module+定义类名的方式 就不会污染全局（因为打包生成的类名唯一），就像写传统的class，定义一个类样式像变量一样多处使用 */
+:root {
+  --asdasdasda: #999999;
+}
+
+.test {
+  color: #0958ec;
+  text-decoration: none;
+}
+
+.test:hover {
+  border-bottom-color: transparent;
+  /* 后者也用的话，后面覆盖前面的 */
+  color: #db3988 !important;
+  text-decoration: none;
+}
+
+/* 标签选择器的样式，一旦在组件里使用，还是会css全局注入影响其他组件，和:root一样 */
+h3 {
+  color: #af09ec;
+  text-decoration: none;
+}
