@@ -1,5 +1,8 @@
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { socket } from "@/service/socket";
-import { SetStateAction, useEffect, useState } from "react";
+import { Blockquote, Button } from "@radix-ui/themes";
+import { useEffect, useState } from "react";
+import InputForm from "@/components/InputForm";
 
 export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
@@ -10,21 +13,10 @@ export default function Home() {
     const input = document.getElementById("input");
     const messages = document.getElementById("messages");
 
-    form?.addEventListener("submit", (e) => {
-      e.preventDefault();
-      if (input?.value) {
-        socket.emit("chat message", input.value);
-        // const item = document.createElement("li");
-        // item.textContent = input.value;
-        // messages?.appendChild(item);
-        // window.scrollTo(0, document.body.scrollHeight);
-        input.value = "";
-      }
-    });
-
     if (socket.connected) {
       onConnect();
     }
+
     function onConnect() {
       setIsConnected(true);
       setTransport(socket.io.engine.transport.name);
@@ -42,7 +34,7 @@ export default function Home() {
 
     socket.on("chat message", (msg: string | null) => {
       console.log("client-receive: " + msg);
-      const item = document.createElement("li");
+      const item = document.createElement("div");
       item.textContent = msg;
       messages?.appendChild(item);
       window.scrollTo(0, document.body.scrollHeight);
@@ -55,14 +47,41 @@ export default function Home() {
   }, []);
 
   return (
-    <div>
-      <p>Status: {isConnected ? "connected" : "disconnected"}</p>
-      <p>Transport: {transport}</p>
-      <ul id="messages"></ul>
-      <form id="form" action="">
-        <input id="input" className="bg-green-300" autoComplete="off" />
-        <button>Send</button>
-      </form>
+    <div className="flex flex-col items-center p-3 h-screen">
+      <Blockquote>
+        <p>Status: {isConnected ? "connected" : "disconnected"}</p>
+        <p>Transport: {transport}</p>
+      </Blockquote>
+      {/* <p>clientsCount: {socket.engine.clientsCount}</p> */}
+      <div
+        id="messages"
+        className="flex-1 w-full rounded-md border p-2 my-3 overflow-y-auto"
+      >
+        {/* <div className="p-4">
+        <h4 className="mb-4 text-sm font-medium leading-none">Tags</h4>
+        {tags.map((tag) => (
+          <>
+            <div key={tag} className="text-sm">
+              {tag}
+            </div>
+            <Separator className="my-2" />
+          </>
+        ))}
+      </div> */}
+      </div>
+
+      <Tabs defaultValue="text" className="w-[400px]">
+        <TabsList>
+          <TabsTrigger value="text">Text</TabsTrigger>
+          <TabsTrigger value="file">File</TabsTrigger>
+        </TabsList>
+        <TabsContent value="text">
+          <InputForm />
+        </TabsContent>
+        <TabsContent value="file">
+          <InputForm isFile />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

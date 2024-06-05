@@ -25,6 +25,27 @@ app.prepare().then(() => {
     });
   });
 
+  const nsp = io.of("/my-namespace");
+
+  nsp.on("connection", (socket) => {
+    console.log("someone connected");
+  });
+
+  io.engine.on("connection_error", (err) => {
+    const {
+      req, // the request object
+      code, // the error code, for example 1
+      message, // the error message, for example "Session ID unknown"
+      context, // some additional error context
+    } = err;
+    console.log({
+      req,
+      code,
+      message,
+      context,
+    });
+  });
+
   httpServer
     .once("error", (err) => {
       console.error(err);
