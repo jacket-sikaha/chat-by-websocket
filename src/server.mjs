@@ -1,11 +1,14 @@
-import { writeFile } from "fs/promises";
+import { openSync } from "fs";
+import { mkdir, opendir, writeFile } from "fs/promises";
 import { createServer } from "http";
 import next from "next";
+import { join } from "path";
 import { Server } from "socket.io";
 // "ws://192.168.4.241:3000"
 const dev = process.env.NODE_ENV !== "production";
 const hostname = "192.168.4.241";
 const port = 3000;
+const __dirname = process.cwd();
 // when using middleware `hostname` and `port` must be provided below
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
@@ -25,10 +28,23 @@ app.prepare().then(() => {
     });
 
     socket.on("upload", async (file, callback) => {
-      console.log(file); // <Buffer 25 50 44 ...>
-      // save the content to the disk, for example
+      console.log(file);
+      const projectFolder = join(__dirname, "tmp", "upload");
+
+      const { name, size, type, data } = file;
       try {
-        await writeFile("/tmp/upload", file);
+        openSync(projectFolder, "r");
+      } catch (error) {
+        if (error.code === "ENOENT") {
+          console.error(projectFolder);
+          const dirCreation = await mkdir(projectFolder, { recursive: true });
+        } else {
+          return;
+        }
+      }
+      try {
+        await writeFile(join(projectFolder, `${Date.now()}-${name}`), data);
+        callback({ message: "success" });
       } catch (error) {
         callback({ message: error });
       }

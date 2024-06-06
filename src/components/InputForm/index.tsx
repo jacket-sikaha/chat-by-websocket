@@ -50,14 +50,17 @@ const InputForm: React.FC<{ isFile?: boolean }> = ({ isFile = false }) => {
         }
       : undefined,
   });
-  function onSubmit(data: z.infer<FormSchema>) {
+  async function onSubmit(data: z.infer<FormSchema>) {
     let input = document.getElementById("upload-file") as HTMLInputElement;
     if (!isFile) {
       socket.emit("chat message", data?.content as string);
       showToast(data);
     }
     if (isFile && input && input.files) {
-      socket.emit("upload", input.files[0], (status: any) => {
+      console.log("input.files", input.files);
+      const { name, size, type } = input.files[0];
+      let data = await input.files[0].arrayBuffer();
+      socket.emit("upload", { name, size, type, data }, (status: any) => {
         showToast(status);
       });
     }
