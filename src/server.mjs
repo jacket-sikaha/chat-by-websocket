@@ -1,3 +1,4 @@
+import { writeFile } from "fs/promises";
 import { createServer } from "http";
 import next from "next";
 import { Server } from "socket.io";
@@ -12,16 +13,25 @@ const handler = app.getRequestHandler();
 app.prepare().then(() => {
   const httpServer = createServer(handler);
 
-  const io = new Server(httpServer);
+  const io = new Server({ ...httpServer, maxHttpBufferSize: 8e8 }); // 800M
 
   io.on("connection", (socket) => {
-    console.log(socket.id); // ojIckSD2jqNzOqIrAGzL
-    console.log("a user connected");
+    console.log("a user connected:" + socket.id);
     socket.on("chat message", (msg) => {
       console.log("server-receive: " + msg);
       io.emit("chat message", msg);
       // 除某个发射套接字之外的所有人发送消息
       // socket.broadcast.emit("chat message", msg + new Date().toLocaleString());
+    });
+
+    socket.on("upload", async (file, callback) => {
+      console.log(file); // <Buffer 25 50 44 ...>
+      // save the content to the disk, for example
+      try {
+        await writeFile("/tmp/upload", file);
+      } catch (error) {
+        callback({ message: error });
+      }
     });
   });
 

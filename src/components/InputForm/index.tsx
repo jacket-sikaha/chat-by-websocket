@@ -18,6 +18,7 @@ import { Input } from "@/components/ui/input";
 import { toast } from "@/components/ui/use-toast";
 import { Textarea } from "../ui/textarea";
 import React from "react";
+import { socket } from "@/service/socket";
 
 const FormSchemaContent = z.object({
   content: z.string().min(2, {
@@ -29,6 +30,16 @@ const FormSchemaFile = z.object({
   file: z.any(),
 });
 
+const showToast = (data: any) => {
+  toast({
+    title: "You submitted the following values:",
+    description: (
+      <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
+        <code className="text-white">{JSON.stringify(data, null, 2)}</code>
+      </pre>
+    ),
+  });
+};
 export type FormSchema = typeof FormSchemaContent | typeof FormSchemaFile;
 const InputForm: React.FC<{ isFile?: boolean }> = ({ isFile = false }) => {
   const form = useForm<z.infer<FormSchema>>({
@@ -40,15 +51,16 @@ const InputForm: React.FC<{ isFile?: boolean }> = ({ isFile = false }) => {
       : undefined,
   });
   function onSubmit(data: z.infer<FormSchema>) {
-    console.log("data", typeof data?.file);
-    toast({
-      title: "You submitted the following values:",
-      description: (
-        <pre className="mt-2 w-[340px] rounded-md bg-slate-950 p-4">
-          <code className="text-white">{JSON.stringify(data, null, 2)}</code>
-        </pre>
-      ),
-    });
+    let input = document.getElementById("upload-file") as HTMLInputElement;
+    if (!isFile) {
+      socket.emit("chat message", data?.content as string);
+      showToast(data);
+    }
+    if (isFile && input && input.files) {
+      socket.emit("upload", input.files[0], (status: any) => {
+        showToast(status);
+      });
+    }
   }
 
   return (

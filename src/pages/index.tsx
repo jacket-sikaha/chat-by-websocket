@@ -9,8 +9,6 @@ export default function Home() {
   const [transport, setTransport] = useState("N/A");
 
   useEffect(() => {
-    const form = document.getElementById("form");
-    const input = document.getElementById("input");
     const messages = document.getElementById("messages");
 
     if (socket.connected) {
@@ -53,6 +51,7 @@ export default function Home() {
         <p>Transport: {transport}</p>
       </Blockquote>
       {/* <p>clientsCount: {socket.engine.clientsCount}</p> */}
+
       <div
         id="messages"
         className="flex-1 w-full rounded-md border p-2 my-3 overflow-y-auto"

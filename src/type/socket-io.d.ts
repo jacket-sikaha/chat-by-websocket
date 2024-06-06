@@ -8,6 +8,7 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   hello: () => void;
   ["chat message"]: (msg: string | null) => void;
+  upload: (data: File, cb?: (status: any) => void) => void;
 }
 
 export interface InterServerEvents {
