@@ -13,8 +13,8 @@ const handler = app.getRequestHandler();
 app.prepare().then(() => {
   const httpServer = createServer(handler);
 
-  const io = new Server({ ...httpServer, maxHttpBufferSize: 8e8 }); // 800M
-
+  const io = new Server(httpServer);
+  io.maxHttpBufferSize = 8e8; // 800M
   io.on("connection", (socket) => {
     console.log("a user connected:" + socket.id);
     socket.on("chat message", (msg) => {
