@@ -19,6 +19,8 @@ import { toast } from "@/components/ui/use-toast";
 import { Textarea } from "../ui/textarea";
 import React from "react";
 import { socket } from "@/service/socket";
+import { FileSocketData } from "@/type/socket-io";
+import { useFileHook } from "./file-hook";
 
 const FormSchemaContent = z.object({
   content: z.string().min(2, {
@@ -30,7 +32,7 @@ const FormSchemaFile = z.object({
   file: z.any(),
 });
 
-const showToast = (data: any) => {
+export const showToast = (data: any) => {
   toast({
     title: "You submitted the following values:",
     description: (
@@ -40,8 +42,11 @@ const showToast = (data: any) => {
     ),
   });
 };
+
 export type FormSchema = typeof FormSchemaContent | typeof FormSchemaFile;
+
 const InputForm: React.FC<{ isFile?: boolean }> = ({ isFile = false }) => {
+  const { fileList, handleFileSummit } = useFileHook();
   const form = useForm<z.infer<FormSchema>>({
     resolver: zodResolver(!isFile ? FormSchemaContent : FormSchemaFile),
     defaultValues: !isFile
@@ -50,19 +55,15 @@ const InputForm: React.FC<{ isFile?: boolean }> = ({ isFile = false }) => {
         }
       : undefined,
   });
-  async function onSubmit(data: z.infer<FormSchema>) {
+
+  function onSubmit(data: z.infer<FormSchema>) {
     let input = document.getElementById("upload-file") as HTMLInputElement;
     if (!isFile) {
       socket.emit("chat message", data?.content as string);
       showToast(data);
     }
     if (isFile && input && input.files) {
-      console.log("input.files", input.files);
-      const { name, size, type } = input.files[0];
-      let data = await input.files[0].arrayBuffer();
-      socket.emit("upload", { name, size, type, data }, (status: any) => {
-        showToast(status);
-      });
+      handleFileSummit(input.files);
     }
   }
 

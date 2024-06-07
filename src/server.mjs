@@ -1,5 +1,5 @@
 import { openSync } from "fs";
-import { mkdir, opendir, writeFile } from "fs/promises";
+import { mkdir, opendir, readFile, statfs, writeFile } from "fs/promises";
 import { createServer } from "http";
 import next from "next";
 import { join } from "path";
@@ -9,6 +9,7 @@ const dev = process.env.NODE_ENV !== "production";
 const hostname = "192.168.4.241";
 const port = 3000;
 const __dirname = process.cwd();
+const projectFolder = join(__dirname, "tmp", "upload");
 // when using middleware `hostname` and `port` must be provided below
 const app = next({ dev, hostname, port });
 const handler = app.getRequestHandler();
@@ -20,6 +21,7 @@ app.prepare().then(() => {
   io.maxHttpBufferSize = 8e8; // 800M
   io.on("connection", (socket) => {
     console.log("a user connected:" + socket.id);
+
     socket.on("chat message", (msg) => {
       console.log("server-receive: " + msg);
       io.emit("chat message", msg);
@@ -29,7 +31,6 @@ app.prepare().then(() => {
 
     socket.on("upload", async (file, callback) => {
       console.log(file);
-      const projectFolder = join(__dirname, "tmp", "upload");
 
       const { name, size, type, data } = file;
       try {
@@ -43,10 +44,27 @@ app.prepare().then(() => {
         }
       }
       try {
-        await writeFile(join(projectFolder, `${Date.now()}-${name}`), data);
-        callback({ message: "success" });
+        let uuid = Date.now();
+        await writeFile(join(projectFolder, `${uuid}-${name}`), data);
+        callback(
+          { message: "success" },
+          { name: `${uuid}-${name}`, originName: name, size, type, uuid }
+        );
       } catch (error) {
         callback({ message: error });
+      }
+    });
+
+    socket.on("download-file", async (msg) => {
+      try {
+        console.log("server-receive-file: " + msg);
+        // const info = await statfs(join(projectFolder, msg));
+        // console.log("info", info);
+        const file = await readFile(join(projectFolder, msg));
+        socket.emit("download-file", file, msg);
+        io.to();
+      } catch (error) {
+        console.error("error", error);
       }
     });
   });

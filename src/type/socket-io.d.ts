@@ -8,7 +8,11 @@ export interface ServerToClientEvents {
 export interface ClientToServerEvents {
   hello: () => void;
   ["chat message"]: (msg: string | null) => void;
-  upload: (data: File, cb?: (status: any) => void) => void;
+  upload: (
+    data: FileSocketData,
+    cb?: (status: any, file: FileSocketData) => void
+  ) => void;
+  ["download-file"]: (name: string) => void;
 }
 
 export interface InterServerEvents {
@@ -18,4 +22,13 @@ export interface InterServerEvents {
 export interface SocketData {
   name: string;
   age: number;
+}
+
+export interface FileSocketData {
+  name: string;
+  originName?: string;
+  size: number;
+  type: string;
+  data: ArrayBuffer;
+  uuid?: number;
 }
