@@ -1,5 +1,6 @@
 // Next.js API route support: https://nextjs.org/docs/api-routes/introduction
 import type { NextApiRequest, NextApiResponse } from "next";
+import { join } from "path";
 
 type Data = {
   name: string;
@@ -7,7 +8,9 @@ type Data = {
 
 export default function handler(
   req: NextApiRequest,
-  res: NextApiResponse<Data>,
+  res: NextApiResponse<Data>
 ) {
-  res.status(200).json({ name: "John Doe" });
+  const __dirname = process.cwd();
+  const projectFolder = join(__dirname, "tmp", "upload");
+  res.status(200).json({ name: projectFolder });
 }

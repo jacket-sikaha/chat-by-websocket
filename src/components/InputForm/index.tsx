@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -19,7 +18,6 @@ import { toast } from "@/components/ui/use-toast";
 import { Textarea } from "../ui/textarea";
 import React from "react";
 import { socket } from "@/service/socket";
-import { FileSocketData } from "@/type/socket-io";
 import { useFileHook } from "./file-hook";
 
 const FormSchemaContent = z.object({

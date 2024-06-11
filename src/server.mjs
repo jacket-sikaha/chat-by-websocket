@@ -30,8 +30,6 @@ app.prepare().then(() => {
     });
 
     socket.on("upload", async (file, callback) => {
-      console.log(file);
-
       const { name, size, type, data } = file;
       try {
         openSync(projectFolder, "r");
@@ -46,25 +44,20 @@ app.prepare().then(() => {
       try {
         let uuid = Date.now();
         await writeFile(join(projectFolder, `${uuid}-${name}`), data);
-        callback(
-          { message: "success" },
-          { name: `${uuid}-${name}`, originName: name, size, type, uuid }
-        );
+        // callback(
+        //   { message: "success" },
+        //   { name: `${uuid}-${name}`, originName: name, size, type, uuid }
+        // );
+        // 上面的cb函数只能发送的客户端能接收并执行，其他客户端没有响应
+        io.emit("upload", {
+          name: `${uuid}-${name}`,
+          originName: name,
+          size,
+          type,
+          uuid,
+        });
       } catch (error) {
         callback({ message: error });
-      }
-    });
-
-    socket.on("download-file", async (msg) => {
-      try {
-        console.log("server-receive-file: " + msg);
-        // const info = await statfs(join(projectFolder, msg));
-        // console.log("info", info);
-        const file = await readFile(join(projectFolder, msg));
-        socket.emit("download-file", file, msg);
-        io.to();
-      } catch (error) {
-        console.error("error", error);
       }
     });
   });
