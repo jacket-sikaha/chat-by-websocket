@@ -3,6 +3,7 @@ export interface ServerToClientEvents {
   basicEmit: (a: number, b: string, c: Buffer) => void;
   withAck: (d: string, callback: (e: number) => void) => void;
   ["chat message"]: (msg: string | null) => void;
+  upload: (file: FileSocketData) => void;
 }
 
 export interface ClientToServerEvents {
@@ -12,7 +13,7 @@ export interface ClientToServerEvents {
     data: FileSocketData,
     cb?: (status: any, file: FileSocketData) => void
   ) => void;
-  ["download-file"]: (name: string) => void;
+  ["download-file"]: (name: string, cb?: (data: any) => void) => void;
 }
 
 export interface InterServerEvents {
