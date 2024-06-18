@@ -24,16 +24,16 @@ WORKDIR /app
 # 再次安装 pnpm
 RUN npm install -g pnpm
 
-# 从构建阶段复制构建结果到当前工作目录
-COPY --from=builder /app/next.config.js ./
-COPY --from=builder /app/public ./public
-# 确保复制的路径匹配构建输出的路径
-COPY --from=builder /app/.next ./.next
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package.json ./package.json
+# # 从构建阶段复制构建结果到当前工作目录
+# COPY --from=builder /app/next.config.js ./
+# COPY --from=builder /app/public ./public
+# # 确保复制的路径匹配构建输出的路径
+# COPY --from=builder /app/.next ./.next
+# COPY --from=builder /app/node_modules ./node_modules
+# COPY --from=builder /app/package.json ./package.json
 
-# 设置环境变量以便于运行 Next.js 应用
-ENV NEXT_TELEMETRY_DISABLED 1
+# # 设置环境变量以便于运行 Next.js 应用
+# ENV NEXT_TELEMETRY_DISABLED 1
 
 # 暴露端口（Next.js 默认端口为 3000）
 EXPOSE 8093
