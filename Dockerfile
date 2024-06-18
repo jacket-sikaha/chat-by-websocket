@@ -25,7 +25,7 @@ WORKDIR /app
 RUN npm install -g pnpm
 
 # # 从构建阶段复制构建结果到当前工作目录
-# COPY --from=builder /app/next.config.js ./
+COPY --from=builder /app ./
 # COPY --from=builder /app/public ./public
 # # 确保复制的路径匹配构建输出的路径
 # COPY --from=builder /app/.next ./.next

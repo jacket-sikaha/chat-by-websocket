@@ -2,10 +2,10 @@ name: Publish Docker image
 
 on:
   push:
-    branches: ['main']
+    branches: ["main"]
 
 env:
-  REGISTRY: docker.io/sikaha  # 或者 docker.io/your_username 等
+  REGISTRY: docker.io/sikaha # 或者 docker.io/your_username 等
   IMAGE_NAME: chat-by-websocket
 
 jobs:
@@ -29,25 +29,24 @@ jobs:
 
       - name: Extract metadata (tags, labels) for Docker
         id: meta
-        uses: docker/metadata-action@v4  # 注意版本可能需要更新
+        uses: docker/metadata-action@v4 # 注意版本可能需要更新
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}  # 确保这里格式正确
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}} # 确保这里格式正确
 
       - name: Build and push Docker image
         id: push
-        uses: docker/build-push-action@v2  # 更新到v2，v3b5e8027fcad23fda98b2e3ac259d8d67585f671可能不是最新或推荐版本
+        uses: docker/build-push-action@v2 # 更新到v2，v3b5e8027fcad23fda98b2e3ac259d8d67585f671可能不是最新或推荐版本
         with:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ steps.meta.outputs.tags }}  # 这里应该产出正确的标签格式，如 "ghcr.io/your_username/chat-by-websocket:main"
+          tags: ${{ steps.meta.outputs.tags }} # 这里应该产出正确的标签格式，如 "ghcr.io/your_username/chat-by-websocket:main"
           labels: ${{ steps.meta.outputs.labels }}
-      
-      
+
       - name: Generate artifact attestation
         uses: actions/attest-build-provenance@v1
         with:
-        # 设置镜像仓库相关信息
+          # 设置镜像仓库相关信息
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME}}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
