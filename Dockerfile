@@ -1,15 +1,15 @@
 # Stage 1: 使用官方 Node.js 作为构建环境
-FROM node:alpine as builder
+FROM node:alpine
 WORKDIR /app
 
 # VOLUME指令创建了一个名为/app的挂载点，它将与主机上的一个目录进行关联
-VOLUME [ "/app" ]
-
-# 安装 pnpm
-RUN npm install -g pnpm
+# VOLUME [ "/app" ]
 
 # 复制 package.json 和 pnpm-lock.yaml 文件到工作目录
 COPY package.json pnpm-lock.yaml ./
+
+# 安装 pnpm
+RUN npm install -g pnpm
 
 # 安装项目依赖
 RUN pnpm install
