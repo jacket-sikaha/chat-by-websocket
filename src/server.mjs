@@ -6,7 +6,7 @@ import { join } from "path";
 import { Server } from "socket.io";
 // "ws://192.168.4.241:3000"
 const dev = process.env.NODE_ENV !== "production";
-const hostname = "192.168.4.241";
+const hostname = "127.0.0.1";
 const port = 3000;
 const __dirname = process.cwd();
 const projectFolder = join(__dirname, "tmp", "upload");

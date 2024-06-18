@@ -39,7 +39,7 @@ RUN pnpm build
 # ENV NEXT_TELEMETRY_DISABLED 1
 
 # 暴露端口（Next.js 默认端口为 3000）
-EXPOSE 8093
+EXPOSE 3000
 
 # 使用 pnpm start 来启动应用
 CMD ["pnpm", "start"]
