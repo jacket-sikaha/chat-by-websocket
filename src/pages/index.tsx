@@ -1,7 +1,7 @@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { socket } from "@/service/socket";
 import { Blockquote, Button } from "@radix-ui/themes";
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import InputForm from "@/components/InputForm";
 
 export default function Home() {
@@ -18,9 +18,12 @@ export default function Home() {
     function onConnect() {
       setIsConnected(true);
       setTransport(socket.io.engine.transport.name);
-      socket.io.engine.on("upgrade", (transport) => {
-        setTransport(transport.name);
-      });
+      socket.io.engine.on(
+        "upgrade",
+        (transport: { name: SetStateAction<string> }) => {
+          setTransport(transport.name);
+        }
+      );
     }
     function onDisconnect() {
       setIsConnected(false);

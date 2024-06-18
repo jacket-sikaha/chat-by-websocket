@@ -1,5 +1,5 @@
 import { openSync } from "fs";
-import { mkdir, opendir, readFile, statfs, writeFile } from "fs/promises";
+import { mkdir, readFile, writeFile } from "fs/promises";
 import { createServer } from "http";
 import next from "next";
 import { join } from "path";
@@ -18,7 +18,7 @@ app.prepare().then(() => {
   const httpServer = createServer(handler);
 
   const io = new Server(httpServer);
-  io.maxHttpBufferSize = 8e8; // 800M
+  io.maxHttpBufferSize = 1e8; // 100M
   io.on("connection", (socket) => {
     console.log("a user connected:" + socket.id);
 

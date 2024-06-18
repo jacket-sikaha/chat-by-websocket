@@ -1,9 +1,14 @@
 import { socket } from "@/service/socket";
 import { FileSocketData } from "@/type/socket-io";
 import { useEffect, useState } from "react";
-import { showToast } from ".";
 
-const downloadFileCb = ({ file, name }) => {
+const downloadFileCb = ({
+  file,
+  name,
+}: {
+  file: ArrayBuffer;
+  name: string;
+}) => {
   console.log("client-receive: " + file);
   // 创建一个新的 Blob 对象
   const blob = new Blob([file], {
@@ -34,7 +39,7 @@ export const useFileHook = () => {
   };
 
   useEffect(() => {
-    socket.on("upload", async (file) => {
+    socket.on("upload", async (file: FileSocketData) => {
       const messages = document.getElementById("messages");
       setFileList([...fileList, file]);
       const item = document.createElement("div");

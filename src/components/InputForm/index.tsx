@@ -59,7 +59,10 @@ const InputForm: React.FC<{ isFile?: boolean }> = ({ isFile = false }) => {
   function onSubmit(data: z.infer<FormSchema>) {
     let input = document.getElementById("upload-file") as HTMLInputElement;
     if (!isFile) {
-      socket.emit("chat message", data?.content as string);
+      let tmp = data as {
+        content: string;
+      };
+      socket.emit("chat message", tmp.content as string);
       showToast(data);
     }
     if (isFile && input && input.files) {
