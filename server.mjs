@@ -4,6 +4,7 @@ import { createServer } from "http";
 import next from "next";
 import { join } from "path";
 import { Server } from "socket.io";
+
 // "ws://192.168.4.241:3000"
 const dev = process.env.NODE_ENV !== "production";
 console.log("dev", process.env.NODE_ENV);
@@ -18,8 +19,11 @@ const handler = app.getRequestHandler();
 app.prepare().then(() => {
   const httpServer = createServer(handler);
 
-  const io = new Server(httpServer);
-  io.maxHttpBufferSize = 1e8; // 100M
+  const io = new Server(httpServer, {
+    maxHttpBufferSize: 1e8, // 100M
+    pingTimeout: 30000,
+  });
+
   io.on("connection", (socket) => {
     // console.log("a user connected:" + socket.id);
 
