@@ -34,7 +34,6 @@ export default function Home() {
     socket.on("disconnect", onDisconnect);
 
     socket.on("chat message", (msg: string | null) => {
-      console.log("client-receive: " + msg);
       const item = document.createElement("div");
       item.textContent = msg;
       messages?.appendChild(item);
@@ -42,6 +41,7 @@ export default function Home() {
     });
 
     return () => {
+      socket.off("chat message");
       socket.off("connect", onConnect);
       socket.off("disconnect", onDisconnect);
     };

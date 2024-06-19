@@ -6,7 +6,7 @@ import { join } from "path";
 import { Server } from "socket.io";
 // "ws://192.168.4.241:3000"
 const dev = process.env.NODE_ENV !== "production";
-console.log('dev',process.env.NODE_ENV)
+console.log("dev", process.env.NODE_ENV);
 const hostname = "127.0.0.1";
 const port = 3000;
 const __dirname = process.cwd();
@@ -21,26 +21,24 @@ app.prepare().then(() => {
   const io = new Server(httpServer);
   io.maxHttpBufferSize = 1e8; // 100M
   io.on("connection", (socket) => {
-    console.log("a user connected:" + socket.id);
+    // console.log("a user connected:" + socket.id);
 
     socket.on("chat message", (msg) => {
-      console.log("server-receive: " + msg);
+      // console.log("server-receive: " + msg);
       io.emit("chat message", msg);
       // 除某个发射套接字之外的所有人发送消息
       // socket.broadcast.emit("chat message", msg + new Date().toLocaleString());
     });
 
     socket.on("upload", async (file, callback) => {
-      console.log(file);
-
       const { name, size, type, data } = file;
       try {
         openSync(projectFolder, "r");
       } catch (error) {
         if (error.code === "ENOENT") {
-          console.error(projectFolder);
           const dirCreation = await mkdir(projectFolder, { recursive: true });
         } else {
+          console.error("openSync error");
           return;
         }
       }
@@ -57,26 +55,20 @@ app.prepare().then(() => {
         });
       } catch (error) {
         callback({ message: error });
+        console.error("writeFile error");
       }
     });
 
     socket.on("download-file", async (msg, cb) => {
       try {
-        console.log("server-receive-file: " + msg);
         // const info = await statfs(join(projectFolder, msg));
         // console.log("info", info);
         const file = await readFile(join(projectFolder, msg));
         cb({ file, name: msg });
       } catch (error) {
-        console.error("error", error);
+        console.error("download error", error);
       }
     });
-  });
-
-  const nsp = io.of("/my-namespace");
-
-  nsp.on("connection", (socket) => {
-    console.log("someone connected");
   });
 
   io.engine.on("connection_error", (err) => {
@@ -86,7 +78,7 @@ app.prepare().then(() => {
       message, // the error message, for example "Session ID unknown"
       context, // some additional error context
     } = err;
-    console.log({
+    console.log(connection_error, {
       req,
       code,
       message,
