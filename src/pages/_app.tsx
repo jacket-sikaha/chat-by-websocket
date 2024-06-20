@@ -5,6 +5,9 @@ import { Theme, ThemePanel } from "@radix-ui/themes";
 import { Inter as FontSans } from "next/font/google";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toaster";
+import { MsgStore } from "@/context/store";
+import { useState } from "react";
+import { WsMessage } from "@/type/ws-message";
 
 const fontSans = FontSans({
   subsets: ["latin"],
@@ -12,11 +15,19 @@ const fontSans = FontSans({
 });
 
 export default function App({ Component, pageProps }: AppProps) {
+  const [msgList, setMsgList] = useState<WsMessage[]>([]);
   return (
     <Theme className={cn(fontSans.variable)}>
-      <Component {...pageProps} />
-      <ThemePanel />
-      <Toaster />
+      <MsgStore.Provider
+        value={{
+          msgList,
+          AddMsgList: (data) => setMsgList((old) => [...old, data]),
+        }}
+      >
+        <Component {...pageProps} />
+        <ThemePanel />
+        <Toaster />
+      </MsgStore.Provider>
     </Theme>
   );
 }

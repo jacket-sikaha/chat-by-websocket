@@ -67,8 +67,8 @@ app.prepare().then(() => {
       try {
         // const info = await statfs(join(projectFolder, msg));
         // console.log("info", info);
-        const file = await readFile(join(projectFolder, msg));
-        cb({ file, name: msg });
+        const file = await readFile(join(projectFolder, msg?.name));
+        cb({ file, name: msg?.originName });
       } catch (error) {
         console.error("download error", error);
       }

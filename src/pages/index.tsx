@@ -3,10 +3,16 @@ import { socket } from "@/service/socket";
 import { Blockquote, Button } from "@radix-ui/themes";
 import { SetStateAction, useEffect, useState } from "react";
 import InputForm from "@/components/InputForm";
+import { useMsgStore } from "@/context/store";
+import { MsgType } from "@/type/ws-message";
+import { File } from "lucide-react";
+import { FileSocketData } from "@/type/socket-io";
+import { downloadFileCb } from "@/components/InputForm/file-hook";
 
 export default function Home() {
   const [isConnected, setIsConnected] = useState(false);
   const [transport, setTransport] = useState("N/A");
+  const { msgList, AddMsgList } = useMsgStore();
 
   useEffect(() => {
     const messages = document.getElementById("messages");
@@ -34,9 +40,7 @@ export default function Home() {
     socket.on("disconnect", onDisconnect);
 
     socket.on("chat message", (msg: string | null) => {
-      const item = document.createElement("div");
-      item.textContent = msg;
-      messages?.appendChild(item);
+      msg && AddMsgList({ type: MsgType.TEXT, data: msg });
       window.scrollTo(0, document.body.scrollHeight);
     });
 
@@ -59,17 +63,53 @@ export default function Home() {
         id="messages"
         className="flex-1 w-full rounded-md border p-2 my-3 overflow-y-auto"
       >
-        {/* <div className="p-4">
-        <h4 className="mb-4 text-sm font-medium leading-none">Tags</h4>
-        {tags.map((tag) => (
-          <>
-            <div key={tag} className="text-sm">
-              {tag}
+        {msgList.map((msg, index) => {
+          return (
+            <div
+              key={index}
+              className="mb-4 grid grid-cols-[25px_1fr] items-start pb-4 last:mb-0 last:pb-0"
+            >
+              {msg.type === MsgType.TEXT ? (
+                <>
+                  <span className="flex h-2 w-2 translate-y-1 rounded-full bg-sky-500" />
+                  <div className="space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {msg.data as string}
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      {new Date().toLocaleString()}
+                    </p>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <File className="flex h-6 w-6 translate-y-1" />
+                  <div
+                    className="space-y-1"
+                    onClick={() => {
+                      socket.emit(
+                        "download-file",
+                        msg.data as FileSocketData,
+                        downloadFileCb
+                      );
+                    }}
+                  >
+                    <p className="text-sm font-medium leading-none">
+                      {(msg.data as FileSocketData).originName}
+                    </p>
+                    <p className="text-sm text-muted-foreground flex justify-between">
+                      <span>{new Date().toLocaleString()}</span>
+                      <span>
+                        {Math.fround((msg.data as FileSocketData).size / 1024)}
+                        kb
+                      </span>
+                    </p>
+                  </div>
+                </>
+              )}
             </div>
-            <Separator className="my-2" />
-          </>
-        ))}
-      </div> */}
+          );
+        })}
       </div>
 
       <Tabs defaultValue="text" className="w-[400px]">

@@ -19,7 +19,6 @@ import { toast } from "@/components/ui/use-toast";
 import { Textarea } from "../ui/textarea";
 import React from "react";
 import { socket } from "@/service/socket";
-import { FileSocketData } from "@/type/socket-io";
 import { useFileHook } from "./file-hook";
 
 const FormSchemaContent = z.object({
@@ -46,7 +45,7 @@ export const showToast = (data: any) => {
 export type FormSchema = typeof FormSchemaContent | typeof FormSchemaFile;
 
 const InputForm: React.FC<{ isFile?: boolean }> = ({ isFile = false }) => {
-  const { fileList, handleFileSummit } = useFileHook();
+  const { handleFileSummit } = useFileHook();
   const form = useForm<z.infer<FormSchema>>({
     resolver: zodResolver(!isFile ? FormSchemaContent : FormSchemaFile),
     defaultValues: !isFile

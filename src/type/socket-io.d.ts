@@ -13,7 +13,7 @@ export interface ClientToServerEvents {
     data: FileSocketData,
     cb?: (status: any, file: FileSocketData) => void
   ) => void;
-  ["download-file"]: (name: string, cb?: (data: any) => void) => void;
+  ["download-file"]: (data: FileSocketData, cb?: (data: any) => void) => void;
 }
 
 export interface InterServerEvents {

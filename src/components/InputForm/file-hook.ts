@@ -1,8 +1,10 @@
+import { useMsgStore } from "@/context/store";
 import { socket } from "@/service/socket";
 import { FileSocketData } from "@/type/socket-io";
-import { useEffect, useState } from "react";
+import { MsgType } from "@/type/ws-message";
+import { useEffect } from "react";
 
-const downloadFileCb = ({
+export const downloadFileCb = ({
   file,
   name,
 }: {
@@ -30,7 +32,7 @@ const downloadFileCb = ({
 };
 
 export const useFileHook = () => {
-  const [fileList, setFileList] = useState<FileSocketData[]>([]);
+  const { msgList, AddMsgList } = useMsgStore();
 
   const handleFileSummit = async (files: FileList) => {
     const { name, size, type } = files[0];
@@ -39,21 +41,13 @@ export const useFileHook = () => {
   };
 
   useEffect(() => {
-    socket.on("upload", async (file: FileSocketData) => {
-      const messages = document.getElementById("messages");
-      setFileList([...fileList, file]);
-      const item = document.createElement("div");
-      item.onclick = async () => {
-        if (file?.name) {
-          socket.emit("download-file", file.name, downloadFileCb);
-        }
-      };
-      item.textContent = JSON.stringify(file);
-      messages?.appendChild(item);
+    socket.on("upload", (file: FileSocketData) => {
+      AddMsgList({ type: MsgType.FILE, data: { ...file } });
     });
     return () => {
       socket.off("upload");
     };
   }, []);
-  return { fileList, handleFileSummit };
+
+  return { handleFileSummit };
 };
