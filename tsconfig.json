@@ -3,6 +3,7 @@
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
+    "checkJs": true,
     "strict": true,
     "noEmit": true,
     "esModuleInterop": true,
@@ -16,6 +17,12 @@
       "@/*": ["./src/*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "server.ts", "server.mjs"],
+  "include": [
+    "next-env.d.ts",
+    "**/*.ts",
+    "**/*.tsx",
+    "server.ts",
+    "server.mjs"
+  ],
   "exclude": ["node_modules"]
 }

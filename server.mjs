@@ -25,7 +25,7 @@ app.prepare().then(() => {
   });
 
   io.on("connection", (socket) => {
-    // console.log("a user connected:" + socket.id);
+    console.log("user connected:" + socket.id, new Date().toLocaleString());
 
     socket.on("chat message", (msg) => {
       // console.log("server-receive: " + msg);
@@ -39,7 +39,8 @@ app.prepare().then(() => {
       try {
         openSync(projectFolder, "r");
       } catch (error) {
-        if (error.code === "ENOENT") {
+        // @ts-ignore
+        if (error?.code === "ENOENT") {
           const dirCreation = await mkdir(projectFolder, { recursive: true });
         } else {
           console.error("openSync error");
@@ -73,6 +74,20 @@ app.prepare().then(() => {
         console.error("download error", error);
       }
     });
+
+    // 监听disconnect事件，处理客户端断开连接的情况
+    socket.on("disconnect", (reason) => {
+      console.log(
+        "Client disconnected:",
+        socket.id,
+        "Reason:",
+        reason,
+        new Date().toLocaleString()
+      );
+
+      // 在这里可以执行一些清理工作，比如从在线用户列表中移除该用户
+      // 或者关闭与该客户端相关的资源等
+    });
   });
 
   io.engine.on("connection_error", (err) => {
@@ -82,7 +97,7 @@ app.prepare().then(() => {
       message, // the error message, for example "Session ID unknown"
       context, // some additional error context
     } = err;
-    console.log(connection_error, {
+    console.log("connection_error", {
       req,
       code,
       message,
