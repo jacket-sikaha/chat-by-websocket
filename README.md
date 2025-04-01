@@ -1,5 +1,13 @@
 # 基于 websocket 设计一个文件传输助手网站
 
+#### demo
+
+http://xhx.huage.eu.org:8093/
+
+接下来新目标，将重构一下前端页面。。。
+
+---
+
 ## 初期目标------5/27
 
 (htttp 协议版本)利用 nodejs（multer，express），Ajax 实现页面初步的上传下载

@@ -20,7 +20,7 @@ app.prepare().then(() => {
   const httpServer = createServer(handler);
 
   const io = new Server(httpServer, {
-    maxHttpBufferSize: 1e8, // 100M
+    maxHttpBufferSize: 5 * 1e8, // 100M
     pingTimeout: 30000,
   });
 
