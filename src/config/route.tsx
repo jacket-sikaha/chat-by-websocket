@@ -6,6 +6,7 @@ import Home from '../pages/home/index';
 // const Home = () => import("../pages/home.tsx");
 // react router6 + react lazy 延迟加载的正确写法
 const Theme = lazy(() => import('../pages/theme'));
+const Chat = lazy(() => import('../pages/index'));
 
 export const DefaultRoutes = [
   {
@@ -25,6 +26,16 @@ export const DefaultRoutes = [
           <Suspense fallback={<h1>loading</h1>}>
             {/* 这里的Suspense就是只对Theme起作用 */}
             <Theme />
+          </Suspense>
+        )
+      },
+      {
+        path: 'index',
+        name: '主页',
+        element: (
+          <Suspense fallback={<h1>loading</h1>}>
+            {/* 这里的Suspense就是只对Theme起作用 */}
+            <Chat />
           </Suspense>
         )
       }

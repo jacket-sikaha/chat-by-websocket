@@ -1,6 +1,6 @@
 import react from '@vitejs/plugin-react';
+import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv } from 'vite';
-import vitePluginImp from 'vite-plugin-imp';
 
 // const ORIGIN_SERVER = import.meta.env.VITE_ORIGIN_SERVER;
 // https://vitejs.dev/config/
@@ -10,21 +10,7 @@ export default defineConfig(({ command, mode }) => {
   // 设置第三个参数为 '' 来加载所有环境变量，而不管是否有 `VITE_` 前缀。
   const env = loadEnv(mode, process.cwd(), '');
   return {
-    plugins: [
-      react(),
-      vitePluginImp({
-        libList: [
-          // 按需引入 antd
-          {
-            libName: 'antd',
-            style(name) {
-              // use less
-              return `antd/es/${name}/style/index.js`;
-            }
-          }
-        ]
-      })
-    ],
+    plugins: [react(), visualizer({ gzipSize: true })],
     server: {
       proxy: {
         // string shorthand: http://localhost:5173/foo -> http://localhost:4567/foo
