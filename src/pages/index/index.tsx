@@ -1,8 +1,9 @@
 import { Attachments, Bubble, Sender, useXAgent, useXChat } from '@ant-design/x';
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import { CloudUploadOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { Badge, Button, type GetProp } from 'antd';
+import { produce } from 'immer';
 
 const defaultConversationsItems = [
   {
@@ -28,19 +29,24 @@ const roles: GetProp<typeof Bubble.List, 'roles'> = {
 };
 
 const Independent: React.FC = () => {
-  // ==================== Style ====================
-
   // ==================== State ====================
-  const [headerOpen, setHeaderOpen] = React.useState(false);
+  const [headerOpen, setHeaderOpen] = useState(false);
 
-  const [content, setContent] = React.useState('');
+  const [content, setContent] = useState('');
 
-  const [activeKey, setActiveKey] = React.useState(defaultConversationsItems[0].key);
+  const [activeKey, setActiveKey] = useState(defaultConversationsItems[0].key);
 
-  const [attachedFiles, setAttachedFiles] = React.useState<GetProp<typeof Attachments, 'items'>>(
-    []
-  );
+  const [attachedFiles, setAttachedFiles] = useState<GetProp<typeof Attachments, 'items'>>([]);
 
+  const [aaa, setAaa] = useState(2);
+  const [bbb, setBbb] = useState([{ a: 0 }, { a: 4 }]);
+
+  const tmp = produce((draft, num) => {
+    draft.push({ a: num });
+  });
+  const add = (num = 33) => {
+    setBbb((base) => tmp(base, num));
+  };
   // ==================== Runtime ====================
   const [agent] = useXAgent({
     request: async ({ message }, { onSuccess }) => {
@@ -58,6 +64,9 @@ const Independent: React.FC = () => {
     }
   }, [activeKey]);
 
+  useEffect(() => {
+    console.log('update===================');
+  }, [aaa]);
   // ==================== Event ====================
   const onSubmit = (nextContent: string) => {
     if (!nextContent) return;
@@ -140,6 +149,23 @@ const Independent: React.FC = () => {
           prefix={attachmentsNode}
           loading={agent.isRequesting()}
         />
+        <div
+          className="text-xl"
+          onClick={() => {
+            console.log('onClick:');
+            setAaa(1);
+          }}
+        >
+          {aaa}
+        </div>
+        <div
+          className="text-xl"
+          onClick={() => {
+            add(Math.random() * 1000);
+          }}
+        >
+          {JSON.stringify(bbb)}
+        </div>
       </div>
     </div>
   );
