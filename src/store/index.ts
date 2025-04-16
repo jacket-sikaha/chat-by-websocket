@@ -1,4 +1,5 @@
 import { UploadFile } from 'antd';
+import { produce } from 'immer';
 import { create } from 'zustand';
 import { createSelectors } from './utils';
 
@@ -31,10 +32,12 @@ const useChatUsersStoreBase = create<ChatUsers>((set) => ({
   users: [],
   me: '',
   addUser: (user) =>
-    set((state) => ({
-      users: [...state.users, user]
-    })),
-  setMe: (user: any) =>
+    set(
+      produce((state: ChatUsers) => {
+        state.users.push(user);
+      })
+    ),
+  setMe: (user) =>
     set(() => ({
       me: user
     }))
@@ -43,9 +46,11 @@ const useChatUsersStoreBase = create<ChatUsers>((set) => ({
 const useChatMessageStoreBase = create<ChatMessage>((set) => ({
   messages: [],
   handleMsgReceived: (message) =>
-    set((state) => ({
-      messages: [...state.messages, message]
-    }))
+    set(
+      produce((state: ChatMessage) => {
+        state.messages.push(message);
+      })
+    )
 }));
 
 export const useChatUsersStore = createSelectors(useChatUsersStoreBase);
