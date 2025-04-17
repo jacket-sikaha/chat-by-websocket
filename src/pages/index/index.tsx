@@ -1,32 +1,8 @@
-import { Attachments, Bubble, Sender, useXAgent, useXChat } from '@ant-design/x';
-import React, { useEffect, useState } from 'react';
+import { Attachments, Bubble, Sender } from '@ant-design/x';
+import React, { useState } from 'react';
 
-import { CloudUploadOutlined, PaperClipOutlined } from '@ant-design/icons';
-import { Badge, Button, type GetProp } from 'antd';
-import { produce } from 'immer';
-
-const defaultConversationsItems = [
-  {
-    key: '0',
-    label: 'What is Ant Design X?'
-  }
-];
-
-const roles: GetProp<typeof Bubble.List, 'roles'> = {
-  ai: {
-    placement: 'start',
-    typing: { step: 5, interval: 20 },
-    styles: {
-      content: {
-        borderRadius: 16
-      }
-    }
-  },
-  local: {
-    placement: 'end',
-    variant: 'shadow'
-  }
-};
+import { CloudUploadOutlined, PaperClipOutlined, UserOutlined } from '@ant-design/icons';
+import { Badge, Button, Flex, Typography, type GetProp } from 'antd';
 
 const Independent: React.FC = () => {
   // ==================== State ====================
@@ -34,55 +10,52 @@ const Independent: React.FC = () => {
 
   const [content, setContent] = useState('');
 
-  const [activeKey, setActiveKey] = useState(defaultConversationsItems[0].key);
-
   const [attachedFiles, setAttachedFiles] = useState<GetProp<typeof Attachments, 'items'>>([]);
+  const roles: GetProp<typeof Bubble.List, 'roles'> = {
+    msg: {
+      placement: 'end',
+      typing: true,
+      avatar: { icon: <UserOutlined />, style: { background: '#fde3cf' } }
+    },
+    file: {
+      placement: 'end',
+      avatar: { icon: <UserOutlined />, style: { background: '#fde3cf' } },
+      variant: 'outlined',
 
-  const [aaa, setAaa] = useState(2);
-  const [bbb, setBbb] = useState([{ a: 0 }, { a: 4 }]);
-
-  const tmp = produce((draft, num) => {
-    draft.push({ a: num });
-  });
-  const add = (num = 33) => {
-    setBbb((base) => tmp(base, num));
+      messageRender: (items: any) => (
+        <Flex vertical gap="middle">
+          {(items as any[]).map((item) => (
+            <Attachments.FileCard key={item.uid} item={item} />
+          ))}
+        </Flex>
+      )
+    },
+    msg2: {
+      placement: 'start',
+      typing: true,
+      avatar: { icon: <UserOutlined /> }
+    },
+    file2: {
+      placement: 'start',
+      avatar: { icon: <UserOutlined /> },
+      variant: 'outlined',
+      messageRender: (items: any) => (
+        <Flex vertical gap="middle">
+          {(items as any[]).map((item) => (
+            <Attachments.FileCard key={item.uid} item={item} />
+          ))}
+        </Flex>
+      )
+    }
   };
-  // ==================== Runtime ====================
-  const [agent] = useXAgent({
-    request: async ({ message }, { onSuccess }) => {
-      onSuccess(`Mock success return. You said: ${message}`);
-    }
-  });
-
-  const { onRequest, messages, setMessages } = useXChat({
-    agent
-  });
-
-  useEffect(() => {
-    if (activeKey !== undefined) {
-      setMessages([]);
-    }
-  }, [activeKey]);
-
-  useEffect(() => {
-    console.log('update===================');
-  }, [aaa]);
   // ==================== Event ====================
   const onSubmit = (nextContent: string) => {
     if (!nextContent) return;
-    onRequest(nextContent);
     setContent('');
   };
 
   const handleFileChange: GetProp<typeof Attachments, 'onChange'> = (info) =>
     setAttachedFiles(info.fileList);
-
-  const items: GetProp<typeof Bubble.List, 'items'> = messages.map(({ id, message, status }) => ({
-    key: id,
-    loading: status === 'loading',
-    role: status === 'local' ? 'local' : 'ai',
-    content: message
-  }));
 
   const attachmentsNode = (
     <Badge dot={attachedFiles.length > 0 && !headerOpen}>
@@ -102,7 +75,8 @@ const Independent: React.FC = () => {
       }}
     >
       <Attachments
-        beforeUpload={() => false}
+        // beforeUpload={() => false}
+
         items={attachedFiles}
         onChange={handleFileChange}
         placeholder={(type) =>
@@ -118,55 +92,85 @@ const Independent: React.FC = () => {
     </Sender.Header>
   );
 
-  const logoNode = (
-    <div>
-      <img
-        src="https://mdn.alipayobjects.com/huamei_iwk9zp/afts/img/A*eco6RrQhxbMAAAAAAAAAAAAADgCCAQ/original"
-        draggable={false}
-        alt="logo"
-      />
-      <span>Ant Design X</span>
-    </div>
-  );
-
   // ==================== Render =================
   return (
-    <div>
-      <div>
-        {/* 🌟 Logo */}
-        {logoNode}
-      </div>
-      <div>
-        {/* 🌟 消息列表 */}
-        <Bubble.List items={items} roles={roles} />
+    <div className="mx-auto flex h-screen max-w-3xl flex-col gap-3 p-3">
+      {/* 🌟 消息列表 */}
+      <Bubble.List
+        items={[
+          // Normal
+          {
+            key: 0,
+            role: 'msg',
+            content: 'Normal message'
+          },
 
-        {/* 🌟 输入框 */}
-        <Sender
-          value={content}
-          header={senderHeader}
-          onSubmit={onSubmit}
-          onChange={setContent}
-          prefix={attachmentsNode}
-          loading={agent.isRequesting()}
-        />
-        <div
-          className="text-xl"
-          onClick={() => {
-            console.log('onClick:');
-            setAaa(1);
-          }}
-        >
-          {aaa}
-        </div>
-        <div
-          className="text-xl"
-          onClick={() => {
-            add(Math.random() * 1000);
-          }}
-        >
-          {JSON.stringify(bbb)}
-        </div>
-      </div>
+          // ReactNode
+          {
+            key: 1,
+            role: 'msg',
+            content: <Typography.Text type="danger">ReactNode message</Typography.Text>
+          },
+
+          {
+            key: 10,
+            role: 'msg2',
+            content: 'Nor1111mal messa111111ge1111111'
+            // footer: dayjs().format('YYYY-MM-DD HH:mm:ss')
+          },
+          // Role: file
+          {
+            key: 3,
+            role: 'file',
+            content: [
+              {
+                uid: '1',
+                name: 'excel-file.xlsx',
+                size: 111111111
+              },
+              {
+                uid: '2',
+                name: 'word-file.docx',
+                size: 2222111122,
+                status: 'error',
+                percent: 23
+              }
+            ]
+          },
+          {
+            key: 113,
+            role: 'file2',
+            content: [
+              {
+                uid: '1',
+                name: 'excel-file.xlsx',
+                size: 111111111
+              }
+            ]
+          },
+          {
+            key: 11,
+            role: 'msg',
+            content: (
+              <Typography.Text type="danger">
+                Reac11111111111111tNode message111111111111111
+              </Typography.Text>
+            )
+          }
+        ]}
+        roles={roles}
+      />
+
+      {/* 🌟 输入框 */}
+      <Sender
+        className=""
+        value={content}
+        header={senderHeader}
+        onSubmit={onSubmit}
+        onChange={setContent}
+        prefix={attachmentsNode}
+        // loading={agent.isRequesting()}
+      />
     </div>
   );
 };

@@ -3,17 +3,19 @@ import { produce } from 'immer';
 import { create } from 'zustand';
 import { createSelectors } from './utils';
 
-enum ChatMsgTyoe {
+export enum ChatMsgTyoe {
   str = 0,
   file,
   other = 2
 }
 
-type MessageBody = {
+export type MessageBody = {
   type: ChatMsgTyoe;
   str?: string;
   file?: UploadFile[];
+  other?: any;
   from: string;
+  source?: boolean; // 消息来源 ： 1 是发送者 / 0 接收者
 };
 
 interface ChatUsers {

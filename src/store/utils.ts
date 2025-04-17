@@ -13,3 +13,15 @@ export const createSelectors = <S extends UseBoundStore<StoreApi<object>>>(_stor
 
   return store;
 };
+
+// 中间件：state 每次发生变化都将输出日志
+export const logger = (config) => (set, get, api) =>
+  config(
+    (...args) => {
+      console.log('  applying', args);
+      set(...args);
+      console.log('  new state', get());
+    },
+    get,
+    api
+  );
