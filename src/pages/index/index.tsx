@@ -2,17 +2,13 @@ import { Attachments, Bubble, Sender } from '@ant-design/x';
 import React, { useState } from 'react';
 
 import { CloudUploadOutlined, PaperClipOutlined, UserOutlined } from '@ant-design/icons';
-import { Badge, Button, Flex, Typography, type GetProp } from 'antd';
+import { Badge, Button, Flex, type GetProp } from 'antd';
+import { useSocketService } from '../../socket';
+import { ChatMsgTyoe, useChatMessageStore, useChatUsersStore } from '../../store';
 
 const Independent: React.FC = () => {
-  // ==================== State ====================
-  const [headerOpen, setHeaderOpen] = useState(false);
-
-  const [content, setContent] = useState('');
-
-  const [attachedFiles, setAttachedFiles] = useState<GetProp<typeof Attachments, 'items'>>([]);
   const roles: GetProp<typeof Bubble.List, 'roles'> = {
-    msg: {
+    str: {
       placement: 'end',
       typing: true,
       avatar: { icon: <UserOutlined />, style: { background: '#fde3cf' } }
@@ -21,7 +17,6 @@ const Independent: React.FC = () => {
       placement: 'end',
       avatar: { icon: <UserOutlined />, style: { background: '#fde3cf' } },
       variant: 'outlined',
-
       messageRender: (items: any) => (
         <Flex vertical gap="middle">
           {(items as any[]).map((item) => (
@@ -30,7 +25,7 @@ const Independent: React.FC = () => {
         </Flex>
       )
     },
-    msg2: {
+    str2: {
       placement: 'start',
       typing: true,
       avatar: { icon: <UserOutlined /> }
@@ -48,9 +43,33 @@ const Independent: React.FC = () => {
       )
     }
   };
+  // ==================== State ====================
+  const { sendMsg } = useSocketService();
+
+  const me = useChatUsersStore.use.me();
+  const messages = useChatMessageStore.use.messages();
+  const bubbleListItem = messages.map((item, i) => {
+    const k = ChatMsgTyoe[item.type] as keyof typeof ChatMsgTyoe;
+    return {
+      key: i,
+      role: `${k}${item.source ? '' : '2'}`,
+      content: item[k]
+    };
+  });
+  console.log('bubbleListItem:', bubbleListItem);
+  const [content, setContent] = useState('');
+  const [headerOpen, setHeaderOpen] = useState(false);
+
+  const [attachedFiles, setAttachedFiles] = useState<GetProp<typeof Attachments, 'items'>>([]);
+
   // ==================== Event ====================
   const onSubmit = (nextContent: string) => {
     if (!nextContent) return;
+    sendMsg({
+      type: ChatMsgTyoe.str,
+      str: nextContent,
+      from: me
+    });
     setContent('');
   };
 
@@ -96,70 +115,7 @@ const Independent: React.FC = () => {
   return (
     <div className="mx-auto flex h-screen max-w-3xl flex-col gap-3 p-3">
       {/* 🌟 消息列表 */}
-      <Bubble.List
-        items={[
-          // Normal
-          {
-            key: 0,
-            role: 'msg',
-            content: 'Normal message'
-          },
-
-          // ReactNode
-          {
-            key: 1,
-            role: 'msg',
-            content: <Typography.Text type="danger">ReactNode message</Typography.Text>
-          },
-
-          {
-            key: 10,
-            role: 'msg2',
-            content: 'Nor1111mal messa111111ge1111111'
-            // footer: dayjs().format('YYYY-MM-DD HH:mm:ss')
-          },
-          // Role: file
-          {
-            key: 3,
-            role: 'file',
-            content: [
-              {
-                uid: '1',
-                name: 'excel-file.xlsx',
-                size: 111111111
-              },
-              {
-                uid: '2',
-                name: 'word-file.docx',
-                size: 2222111122,
-                status: 'error',
-                percent: 23
-              }
-            ]
-          },
-          {
-            key: 113,
-            role: 'file2',
-            content: [
-              {
-                uid: '1',
-                name: 'excel-file.xlsx',
-                size: 111111111
-              }
-            ]
-          },
-          {
-            key: 11,
-            role: 'msg',
-            content: (
-              <Typography.Text type="danger">
-                Reac11111111111111tNode message111111111111111
-              </Typography.Text>
-            )
-          }
-        ]}
-        roles={roles}
-      />
+      <Bubble.List className="flex-1" items={bubbleListItem} roles={roles} />
 
       {/* 🌟 输入框 */}
       <Sender

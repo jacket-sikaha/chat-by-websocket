@@ -47,12 +47,14 @@ const useChatUsersStoreBase = create<ChatUsers>((set) => ({
 
 const useChatMessageStoreBase = create<ChatMessage>((set) => ({
   messages: [],
-  handleMsgReceived: (message) =>
+  handleMsgReceived: (message) => {
+    console.log('handleMsgReceived', message);
     set(
       produce((state: ChatMessage) => {
         state.messages.push(message);
       })
-    )
+    );
+  }
 }));
 
 export const useChatUsersStore = createSelectors(useChatUsersStoreBase);

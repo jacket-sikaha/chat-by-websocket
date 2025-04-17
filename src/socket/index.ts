@@ -1,8 +1,8 @@
 import { useEffect } from 'react';
 import { io } from 'socket.io-client';
-import { useChatMessageStore, useChatUsersStore } from '../store';
+import { MessageBody, useChatMessageStore, useChatUsersStore } from '../store';
 
-export const url = import.meta.env.DEV ? 'http://localhost:3000' : undefined;
+export const url = import.meta.env.DEV ? 'http://192.168.9.46:3000' : undefined;
 export const socket = io(url);
 
 export const useSocketService = () => {
@@ -16,6 +16,11 @@ export const useSocketService = () => {
     setMe('');
     console.log('disconnected');
   };
+
+  const sendMsg = (data: MessageBody) => {
+    socket.emit('msg', data);
+  };
+
   useEffect(() => {
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
@@ -26,4 +31,5 @@ export const useSocketService = () => {
       socket.off('msg', handleMsgReceived);
     };
   }, []);
+  return { sendMsg };
 };
