@@ -1,13 +1,15 @@
-import { useEffect } from 'react';
+import { useLayoutEffect, useState } from 'react';
 import { io } from 'socket.io-client';
 import { MessageBody, useChatMessageStore, useChatUsersStore } from '../store';
 
 export const url = import.meta.env.DEV ? 'http://192.168.9.46:3000' : undefined;
+console.log('url:', url);
 export const socket = io(url);
 
 export const useSocketService = () => {
+  const [loading, setLoading] = useState(false);
   const setMe = useChatUsersStore.use.setMe();
-  const handleMsgReceived = useChatMessageStore.use.handleMsgReceived();
+  const addMsg = useChatMessageStore.use.handleMsgReceived();
   const onConnect = () => {
     socket.id && setMe(socket.id);
     console.log('connected');
@@ -18,10 +20,16 @@ export const useSocketService = () => {
   };
 
   const sendMsg = (data: MessageBody) => {
+    setLoading(true);
     socket.emit('msg', data);
   };
 
-  useEffect(() => {
+  const handleMsgReceived = (message: MessageBody) => {
+    addMsg(message);
+    setLoading(false);
+  };
+
+  useLayoutEffect(() => {
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('msg', handleMsgReceived);
@@ -31,5 +39,5 @@ export const useSocketService = () => {
       socket.off('msg', handleMsgReceived);
     };
   }, []);
-  return { sendMsg };
+  return { loading, sendMsg };
 };
