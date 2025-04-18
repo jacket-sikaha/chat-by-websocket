@@ -1,10 +1,12 @@
 import { Attachments, Bubble, Sender } from '@ant-design/x';
 import React, { useState } from 'react';
 
+import { downloadBlob } from '@/utils';
 import { CloudUploadOutlined, PaperClipOutlined, UserOutlined } from '@ant-design/icons';
 import { Badge, Button, Flex, type GetProp } from 'antd';
+import { customUploadFileReq, downloadFileReq } from '../../services/file';
 import { useSocketService } from '../../socket';
-import { ChatMsgTyoe, useChatMessageStore, useChatUsersStore } from '../../store';
+import { ChatMsgTyoe, MessageBody, useChatMessageStore, useChatUsersStore } from '../../store';
 
 const Independent: React.FC = () => {
   // ==================== State ====================
@@ -23,7 +25,6 @@ const Independent: React.FC = () => {
 
   const [content, setContent] = useState('');
   const [headerOpen, setHeaderOpen] = useState(false);
-
   const [attachedFiles, setAttachedFiles] = useState<GetProp<typeof Attachments, 'items'>>([]);
   const roles: GetProp<typeof Bubble.List, 'roles'> = {
     str: {
@@ -37,8 +38,16 @@ const Independent: React.FC = () => {
       variant: 'outlined',
       messageRender: (items: any) => (
         <Flex vertical gap="middle">
-          {(items as any[]).map((item) => (
-            <Attachments.FileCard key={item.uid} item={item} />
+          {(items as MessageBody['file'])?.map((item) => (
+            <div
+              key={item.uid}
+              onClick={() => {
+                console.log('findDOMNode', item);
+                onDownload(item.fid, item.type, item.name);
+              }}
+            >
+              <Attachments.FileCard item={item} />
+            </div>
           ))}
         </Flex>
       )
@@ -54,8 +63,16 @@ const Independent: React.FC = () => {
       variant: 'outlined',
       messageRender: (items: any) => (
         <Flex vertical gap="middle">
-          {(items as any[]).map((item) => (
-            <Attachments.FileCard key={item.uid} item={item} />
+          {(items as MessageBody['file'])?.map((item) => (
+            <div
+              key={item.uid}
+              onClick={() => {
+                console.log('findDOMNode', item.fid);
+                onDownload(item.fid, item.type, item.name);
+              }}
+            >
+              <Attachments.FileCard item={item} />
+            </div>
           ))}
         </Flex>
       )
@@ -72,9 +89,34 @@ const Independent: React.FC = () => {
     setContent('');
   };
 
-  const handleFileChange: GetProp<typeof Attachments, 'onChange'> = (info) =>
+  const handleFileChange: GetProp<typeof Attachments, 'onChange'> = (info) => {
+    const flag = info.fileList.every((file) => file.status === 'done');
+    if (flag) {
+      console.log('info', info);
+      const tmp = info.fileList.map(({ xhr, response, originFileObj, ...obj }) => {
+        return obj;
+      });
+      sendMsg({
+        type: ChatMsgTyoe.file,
+        file: tmp as MessageBody['file'],
+        from: me
+      });
+      setHeaderOpen(false);
+      setAttachedFiles([]);
+      return;
+    }
     setAttachedFiles(info.fileList);
+  };
 
+  const onDownload = async (fid: string, type = 'application/octet-stream', filename?: string) => {
+    try {
+      const res = await downloadFileReq(me, fid);
+      downloadBlob(res as Blob, type, filename);
+      console.log('res----------:', res);
+    } catch (error) {
+      console.log('error:', error);
+    }
+  };
   const attachmentsNode = (
     <Badge dot={attachedFiles.length > 0 && !headerOpen}>
       <Button type="text" icon={<PaperClipOutlined />} onClick={() => setHeaderOpen(!headerOpen)} />
@@ -94,9 +136,14 @@ const Independent: React.FC = () => {
     >
       <Attachments
         // beforeUpload={() => false}
-
+        multiple
+        maxCount={3}
         items={attachedFiles}
         onChange={handleFileChange}
+        customRequest={async (options) => {
+          const res = await customUploadFileReq(options, me);
+          console.log('res========:', res, attachedFiles);
+        }}
         placeholder={(type) =>
           type === 'drop'
             ? { title: 'Drop file here' }
@@ -110,7 +157,6 @@ const Independent: React.FC = () => {
     </Sender.Header>
   );
 
-  // ==================== Render =================
   return (
     <div className="mx-auto flex h-screen max-w-3xl flex-col gap-3 p-3">
       <div>{me}</div>

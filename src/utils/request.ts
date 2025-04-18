@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const request = axios.create({
   //   baseURL: "https://127.0.0.1/api/",
-  timeout: 3000
+  timeout: 30 * 1000 // 30秒
   //   headers: { "X-Custom-Header": "foobar" },
 });
 

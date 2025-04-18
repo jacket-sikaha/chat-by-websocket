@@ -12,7 +12,7 @@ export enum ChatMsgTyoe {
 export type MessageBody = {
   type: ChatMsgTyoe;
   str?: string;
-  file?: UploadFile[];
+  file?: (UploadFile & { fid: string })[];
   other?: any;
   from: string;
   source?: boolean; // 消息来源 ： 1 是发送者 / 0 接收者
