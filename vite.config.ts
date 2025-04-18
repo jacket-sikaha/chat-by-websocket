@@ -1,4 +1,5 @@
 import react from '@vitejs/plugin-react';
+import { resolve } from 'path';
 import { visualizer } from 'rollup-plugin-visualizer';
 import { defineConfig, loadEnv } from 'vite';
 
@@ -11,6 +12,15 @@ export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
     plugins: [react(), visualizer({ gzipSize: true })],
+    resolve: {
+      // 配置别名 减少查找模块时间消耗
+      alias: [
+        {
+          find: '@',
+          replacement: resolve(__dirname, './src')
+        }
+      ]
+    },
     server: {
       proxy: {
         // string shorthand: http://localhost:5173/foo -> http://localhost:4567/foo
