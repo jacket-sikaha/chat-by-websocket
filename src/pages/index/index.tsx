@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 
 import { CloudUploadOutlined, PaperClipOutlined, UserOutlined } from '@ant-design/icons';
 import { Badge, Button, Flex, type GetProp } from 'antd';
-import { socket, useSocketService } from '../../socket';
+import { useSocketService } from '../../socket';
 import { ChatMsgTyoe, useChatMessageStore, useChatUsersStore } from '../../store';
 
 const Independent: React.FC = () => {
@@ -11,7 +11,6 @@ const Independent: React.FC = () => {
   const { loading, sendMsg } = useSocketService();
 
   const me = useChatUsersStore.use.me();
-  console.log('me:', me);
   const messages = useChatMessageStore.use.messages();
   const bubbleListItem = messages.map((item, i) => {
     const k = ChatMsgTyoe[item.type] as keyof typeof ChatMsgTyoe;
@@ -21,7 +20,7 @@ const Independent: React.FC = () => {
       content: item[k]
     };
   });
-  // console.log('bubbleListItem:', bubbleListItem);
+
   const [content, setContent] = useState('');
   const [headerOpen, setHeaderOpen] = useState(false);
 
@@ -115,7 +114,6 @@ const Independent: React.FC = () => {
   return (
     <div className="mx-auto flex h-screen max-w-3xl flex-col gap-3 p-3">
       <div>{me}</div>
-      <div>{socket.id}</div>
       {/* 🌟 消息列表 */}
       <Bubble.List className="flex-1" items={bubbleListItem} roles={roles} />
 
