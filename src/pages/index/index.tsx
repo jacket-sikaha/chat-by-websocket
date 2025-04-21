@@ -158,7 +158,7 @@ const Independent: React.FC = () => {
   );
 
   return (
-    <div className="mx-auto flex h-screen max-w-3xl flex-col gap-3 p-3">
+    <div className="mx-auto flex h-full max-w-3xl flex-col gap-3 bg-white p-6">
       <div>{me}</div>
       {/* 🌟 消息列表 */}
       <Bubble.List className="flex-1" items={bubbleListItem} roles={roles} />
