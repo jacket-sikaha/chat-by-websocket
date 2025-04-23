@@ -21,7 +21,7 @@ export type MessageBody = {
 interface ChatUsers {
   users: string[];
   me: string;
-  addUser: (user: string) => void;
+  setUsers: (users: string[]) => void;
   setMe: (user: string) => void;
 }
 
@@ -33,12 +33,11 @@ interface ChatMessage {
 const useChatUsersStoreBase = create<ChatUsers>((set) => ({
   users: [],
   me: '',
-  addUser: (user) =>
-    set(
-      produce((state: ChatUsers) => {
-        state.users.push(user);
-      })
-    ),
+  setUsers: (users) =>
+    set(() => {
+      console.log('users1111:', users);
+      return { users };
+    }),
   setMe: (user) =>
     set(() => ({
       me: user

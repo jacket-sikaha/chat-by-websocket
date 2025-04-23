@@ -156,10 +156,10 @@ const Independent: React.FC = () => {
       />
     </Sender.Header>
   );
-
+  const users = useChatUsersStore.use.users();
+  console.log('users2222222222:', users);
   return (
     <div className="mx-auto flex h-full max-w-3xl flex-col gap-3 bg-white p-6">
-      <div>{me}</div>
       {/* 🌟 消息列表 */}
       <Bubble.List className="flex-1" items={bubbleListItem} roles={roles} />
 

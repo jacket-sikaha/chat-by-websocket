@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { MessageBody, useChatMessageStore, useChatUsersStore } from '../store';
 
@@ -10,7 +10,9 @@ export const socket = io(url, {
 
 export const useSocketService = () => {
   const [loading, setLoading] = useState(false);
+  const timer = useRef<NodeJS.Timeout>();
   const setMe = useChatUsersStore.use.setMe();
+  const setUsers = useChatUsersStore.use.setUsers();
   const addMsg = useChatMessageStore.use.handleMsgReceived();
   const onConnect = () => {
     socket.id && setMe(socket.id);
@@ -34,19 +36,37 @@ export const useSocketService = () => {
     setLoading(false);
   };
 
+  const pollingSetUsers = () => {
+    if (!timer.current) {
+      socket.emit('connected-users', '', (val: string[]) => {
+        console.log('val:', val);
+        setUsers(val);
+      });
+    }
+    timer.current = setInterval(() => {
+      socket.emit('connected-users', '', (val: string[]) => {
+        console.log('val:', val);
+        setUsers(val);
+      });
+    }, 1000 * 30);
+  };
+
   useLayoutEffect(() => {
     socket.connect();
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('msg', handleMsgReceived);
     socket.io.on('error', onError);
+    pollingSetUsers();
     return () => {
       socket.disconnect();
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
       socket.off('msg', handleMsgReceived);
       socket.io.off('error', onError);
+      clearInterval(timer.current);
     };
   }, []);
+
   return { loading, sendMsg };
 };

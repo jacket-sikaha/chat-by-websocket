@@ -4,7 +4,10 @@ import { useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Link, Outlet } from 'react-router-dom';
 import './App.css';
+import OnlineInfoIcon from './components/online-info-icon';
+import UsersDrawer from './components/users-drawer';
 import { DefaultRoutes } from './config/route';
+import { useChatUsersStore } from './store';
 
 // 创建一个 client
 const queryClient = new QueryClient();
@@ -13,6 +16,9 @@ const { Header, Content } = Layout;
 type MenuItem = Required<MenuProps>['items'][number];
 
 function App() {
+  const me = useChatUsersStore.use.me();
+  const users = useChatUsersStore.use.users();
+
   const items: MenuItem[] = useMemo(() => {
     const pathList = DefaultRoutes[0].children.map(({ path, name }) => ({ path, name }));
     return pathList.map(({ path, name }) => ({
@@ -36,6 +42,9 @@ function App() {
             items={items}
             style={{ flex: 1, minWidth: 0 }}
           />
+          <UsersDrawer>
+            <OnlineInfoIcon />
+          </UsersDrawer>
         </Header>
         <Content>
           <Outlet />
