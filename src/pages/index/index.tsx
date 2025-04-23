@@ -8,7 +8,7 @@ import { customUploadFileReq, downloadFileReq } from '../../services/file';
 import { useSocketService } from '../../socket';
 import { ChatMsgTyoe, MessageBody, useChatMessageStore, useChatUsersStore } from '../../store';
 
-const Independent: React.FC = () => {
+const ChatPage: React.FC = () => {
   // ==================== State ====================
   const { loading, sendMsg } = useSocketService();
 
@@ -175,4 +175,4 @@ const Independent: React.FC = () => {
   );
 };
 
-export default Independent;
+export default ChatPage;

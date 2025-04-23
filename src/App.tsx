@@ -7,7 +7,6 @@ import './App.css';
 import OnlineInfoIcon from './components/online-info-icon';
 import UsersDrawer from './components/users-drawer';
 import { DefaultRoutes } from './config/route';
-import { useChatUsersStore } from './store';
 
 // 创建一个 client
 const queryClient = new QueryClient();
@@ -16,11 +15,13 @@ const { Header, Content } = Layout;
 type MenuItem = Required<MenuProps>['items'][number];
 
 function App() {
-  const me = useChatUsersStore.use.me();
-  const users = useChatUsersStore.use.users();
-
   const items: MenuItem[] = useMemo(() => {
-    const pathList = DefaultRoutes[0].children.map(({ path, name }) => ({ path, name }));
+    // item is T 明确告知编译器过滤后的类型
+    const pathList = DefaultRoutes[0].children.filter(
+      (x): x is { path: string; name: string; element: JSX.Element; index?: undefined } =>
+        !!x?.path && !!x?.name
+    );
+
     return pathList.map(({ path, name }) => ({
       label: (
         <Link key={path} to={path}>
@@ -36,12 +37,7 @@ function App() {
       <Layout className="h-screen">
         <Header className="flex items-center gap-3 bg-white">
           <RedditOutlined className="text-3xl" />
-          <Menu
-            mode="horizontal"
-            defaultSelectedKeys={['2']}
-            items={items}
-            style={{ flex: 1, minWidth: 0 }}
-          />
+          <Menu mode="horizontal" items={items} style={{ flex: 1, minWidth: 0 }} />
           <UsersDrawer>
             <OnlineInfoIcon />
           </UsersDrawer>
