@@ -92,7 +92,6 @@ const Independent: React.FC = () => {
   const handleFileChange: GetProp<typeof Attachments, 'onChange'> = (info) => {
     const flag = info.fileList.every((file) => file.status === 'done');
     if (flag) {
-      console.log('info', info);
       const tmp = info.fileList.map(({ xhr, response, originFileObj, ...obj }) => {
         return obj;
       });
@@ -156,8 +155,7 @@ const Independent: React.FC = () => {
       />
     </Sender.Header>
   );
-  const users = useChatUsersStore.use.users();
-  console.log('users2222222222:', users);
+
   return (
     <div className="mx-auto flex h-full max-w-3xl flex-col gap-3 bg-white p-6">
       {/* 🌟 消息列表 */}

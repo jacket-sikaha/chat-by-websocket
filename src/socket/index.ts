@@ -37,15 +37,15 @@ export const useSocketService = () => {
   };
 
   const pollingSetUsers = () => {
-    if (!timer.current) {
-      socket.emit('connected-users', '', (val: string[]) => {
-        console.log('val:', val);
-        setUsers(val);
-      });
-    }
+    // if (!timer.current) {
+    //   socket.emit('connected-users', '', (val: string[]) => {
+    //     setUsers(val);
+    //   });
+    // }
+
     timer.current = setInterval(() => {
+      console.log('pollingSetUsers:', pollingSetUsers);
       socket.emit('connected-users', '', (val: string[]) => {
-        console.log('val:', val);
         setUsers(val);
       });
     }, 1000 * 30);

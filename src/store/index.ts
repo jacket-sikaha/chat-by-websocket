@@ -35,7 +35,6 @@ const useChatUsersStoreBase = create<ChatUsers>((set) => ({
   me: '',
   setUsers: (users) =>
     set(() => {
-      console.log('users1111:', users);
       return { users };
     }),
   setMe: (user) =>

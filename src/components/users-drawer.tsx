@@ -1,10 +1,12 @@
+import { socket } from '@/socket';
 import { useChatUsersStore } from '@/store';
 import { Drawer } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 function UsersDrawer({ children }) {
   const [open, setOpen] = useState(false);
   const users = useChatUsersStore.use.users();
+  const setUsers = useChatUsersStore.use.setUsers();
   const me = useChatUsersStore.use.me();
   const showDrawer = () => {
     setOpen(true);
@@ -13,6 +15,12 @@ function UsersDrawer({ children }) {
   const onClose = () => {
     setOpen(false);
   };
+
+  useEffect(() => {
+    socket?.emit('connected-users', '', (val: string[]) => {
+      setUsers(val);
+    });
+  }, [open]);
   return (
     <>
       <div onClick={showDrawer}> {children} </div>
