@@ -3,14 +3,14 @@ import { produce } from 'immer';
 import { create } from 'zustand';
 import { createSelectors } from './utils';
 
-export enum ChatMsgTyoe {
+export enum ChatMsgType {
   str = 0,
   file,
   other = 2
 }
 
 export type MessageBody = {
-  type: ChatMsgTyoe;
+  type: ChatMsgType;
   str?: string;
   file?: (UploadFile & { fid: string })[];
   other?: any;

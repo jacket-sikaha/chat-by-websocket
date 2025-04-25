@@ -1,88 +1,70 @@
 import { Attachments, Bubble, Sender } from '@ant-design/x';
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { downloadBlob } from '@/utils';
-import { CloudUploadOutlined, PaperClipOutlined, UserOutlined } from '@ant-design/icons';
+import { fileBubbleRoleConstructs, strBubbleRoleConstructs } from '@/utils/bubble-role';
+import { CloudUploadOutlined, PaperClipOutlined } from '@ant-design/icons';
 import { Badge, Button, Flex, type GetProp } from 'antd';
 import { customUploadFileReq, downloadFileReq } from '../../services/file';
 import { useSocketService } from '../../socket';
-import { ChatMsgTyoe, MessageBody, useChatMessageStore, useChatUsersStore } from '../../store';
+import { ChatMsgType, MessageBody, useChatMessageStore, useChatUsersStore } from '../../store';
 
 const ChatPage: React.FC = () => {
   // ==================== State ====================
   const { loading, sendMsg } = useSocketService();
 
   const me = useChatUsersStore.use.me();
+  const users = useChatUsersStore.use.users();
   const messages = useChatMessageStore.use.messages();
-  const bubbleListItem = messages.map((item, i) => {
-    const k = ChatMsgTyoe[item.type] as keyof typeof ChatMsgTyoe;
-    return {
-      key: i,
-      role: `${k}${item.source ? '' : '2'}`,
-      content: item[k]
-    };
-  });
+
+  const roles: GetProp<typeof Bubble.List, 'roles'> = useMemo(() => {
+    return Object.assign(
+      {},
+      ...users.map((u) => {
+        let avatar = u.slice(0, 2);
+        return {
+          [`${u}-str`]: strBubbleRoleConstructs(u === me, avatar),
+          [`${u}-file`]: fileBubbleRoleConstructs(u === me, avatar, (items: any) => (
+            <Flex vertical gap="middle">
+              {(items as MessageBody['file'])?.map((item) => (
+                <div
+                  key={item.uid}
+                  onClick={() => {
+                    console.log('findDOMNode', item);
+                    onDownload(item.fid, item.type, item.name);
+                  }}
+                >
+                  <Attachments.FileCard item={item} />
+                </div>
+              ))}
+            </Flex>
+          ))
+        };
+      })
+    );
+  }, [me, users]);
+
+  const bubbleListItem = useMemo(() => {
+    return messages.map((item, i) => {
+      const { type, source, from } = item;
+      const k = ChatMsgType[type] as keyof typeof ChatMsgType;
+      return {
+        key: i,
+        role: `${source ? me : from}-${k}`,
+        content: item[k]
+      };
+    });
+  }, [messages]);
 
   const [content, setContent] = useState('');
   const [headerOpen, setHeaderOpen] = useState(false);
   const [attachedFiles, setAttachedFiles] = useState<GetProp<typeof Attachments, 'items'>>([]);
-  const roles: GetProp<typeof Bubble.List, 'roles'> = {
-    str: {
-      placement: 'end',
-      typing: { step: 10 },
-      avatar: { icon: <UserOutlined />, children: 'asdasd', style: { background: '#fde3cf' } }
-    },
-    file: {
-      placement: 'end',
-      avatar: { icon: <UserOutlined />, children: me, style: { background: '#fde3cf' } },
-      variant: 'outlined',
-      messageRender: (items: any) => (
-        <Flex vertical gap="middle">
-          {(items as MessageBody['file'])?.map((item) => (
-            <div
-              key={item.uid}
-              onClick={() => {
-                console.log('findDOMNode', item);
-                onDownload(item.fid, item.type, item.name);
-              }}
-            >
-              <Attachments.FileCard item={item} />
-            </div>
-          ))}
-        </Flex>
-      )
-    },
-    str2: {
-      placement: 'start',
-      typing: { step: 10 },
-      avatar: { icon: <UserOutlined /> }
-    },
-    file2: {
-      placement: 'start',
-      avatar: { icon: <UserOutlined /> },
-      variant: 'outlined',
-      messageRender: (items: any) => (
-        <Flex vertical gap="middle">
-          {(items as MessageBody['file'])?.map((item) => (
-            <div
-              key={item.uid}
-              onClick={() => {
-                console.log('findDOMNode', item.fid);
-                onDownload(item.fid, item.type, item.name);
-              }}
-            >
-              <Attachments.FileCard item={item} />
-            </div>
-          ))}
-        </Flex>
-      )
-    }
-  };
+
   // ==================== Event ====================
   const onSubmit = (nextContent: string) => {
     if (!nextContent) return;
     sendMsg({
-      type: ChatMsgTyoe.str,
+      type: ChatMsgType.str,
       str: nextContent,
       from: me
     });
@@ -96,7 +78,7 @@ const ChatPage: React.FC = () => {
         return obj;
       });
       sendMsg({
-        type: ChatMsgTyoe.file,
+        type: ChatMsgType.file,
         file: tmp as MessageBody['file'],
         from: me
       });

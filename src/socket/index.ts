@@ -44,7 +44,6 @@ export const useSocketService = () => {
     // }
 
     timer.current = setInterval(() => {
-      console.log('pollingSetUsers:', pollingSetUsers);
       socket.emit('connected-users', '', (val: string[]) => {
         setUsers(val);
       });
