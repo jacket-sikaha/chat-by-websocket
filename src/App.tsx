@@ -1,12 +1,13 @@
 import { RedditOutlined } from '@ant-design/icons';
 import { Layout, Menu, MenuProps } from 'antd';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Link, Outlet } from 'react-router-dom';
 import './App.css';
 import OnlineInfoIcon from './components/online-info-icon';
 import UsersDrawer from './components/users-drawer';
 import { DefaultRoutes } from './config/route';
+import { socket } from './socket';
 
 // 创建一个 client
 const queryClient = new QueryClient();
@@ -30,6 +31,12 @@ function App() {
       ),
       key: path
     }));
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      socket?.disconnect();
+    };
   }, []);
 
   return (

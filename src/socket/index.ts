@@ -11,15 +11,16 @@ export const socket = io(url, {
 export const useSocketService = () => {
   const [loading, setLoading] = useState(false);
   const timer = useRef<NodeJS.Timeout>();
+  const me = useChatUsersStore.use.me();
   const setMe = useChatUsersStore.use.setMe();
   const setUsers = useChatUsersStore.use.setUsers();
   const addMsg = useChatMessageStore.use.handleMsgReceived();
   const onConnect = () => {
+    console.log('me:', me);
     socket.id && setMe(socket.id);
     console.log('connected');
   };
   const onDisconnect = () => {
-    setMe('');
     console.log('disconnected');
   };
 
@@ -58,7 +59,6 @@ export const useSocketService = () => {
     socket.io.on('error', onError);
     pollingSetUsers();
     return () => {
-      socket.disconnect();
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
       socket.off('msg', handleMsgReceived);

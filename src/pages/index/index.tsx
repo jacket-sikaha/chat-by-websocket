@@ -9,6 +9,21 @@ import { customUploadFileReq, downloadFileReq } from '../../services/file';
 import { useSocketService } from '../../socket';
 import { ChatMsgType, MessageBody, useChatMessageStore, useChatUsersStore } from '../../store';
 
+export const onDownload = async (
+  userId: string,
+  fid: string,
+  type = 'application/octet-stream',
+  filename?: string
+) => {
+  try {
+    const res = await downloadFileReq(userId, fid);
+    downloadBlob(res as Blob, type, filename);
+    console.log('res----------:', res);
+  } catch (error) {
+    console.log('error:', error);
+  }
+};
+
 const ChatPage: React.FC = () => {
   // ==================== State ====================
   const { loading, sendMsg } = useSocketService();
@@ -31,7 +46,7 @@ const ChatPage: React.FC = () => {
                   key={item.uid}
                   onClick={() => {
                     console.log('findDOMNode', item);
-                    onDownload(item.fid, item.type, item.name);
+                    onDownload(me, item.fid, item.type, item.name);
                   }}
                 >
                   <Attachments.FileCard item={item} />
@@ -89,15 +104,6 @@ const ChatPage: React.FC = () => {
     setAttachedFiles(info.fileList);
   };
 
-  const onDownload = async (fid: string, type = 'application/octet-stream', filename?: string) => {
-    try {
-      const res = await downloadFileReq(me, fid);
-      downloadBlob(res as Blob, type, filename);
-      console.log('res----------:', res);
-    } catch (error) {
-      console.log('error:', error);
-    }
-  };
   const attachmentsNode = (
     <Badge dot={attachedFiles.length > 0 && !headerOpen}>
       <Button type="text" icon={<PaperClipOutlined />} onClick={() => setHeaderOpen(!headerOpen)} />

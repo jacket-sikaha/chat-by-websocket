@@ -24,7 +24,7 @@ export const DefaultRoutes = [
       },
       {
         path: 'history',
-        name: '历史记录',
+        name: '我收到的信息',
         element: (
           <Suspense
             fallback={<Spin size="large" className="flex h-screen items-center justify-center" />}
