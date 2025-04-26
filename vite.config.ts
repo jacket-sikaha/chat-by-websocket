@@ -21,6 +21,20 @@ export default defineConfig(({ command, mode }) => {
         }
       ]
     },
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            // zustand: ['zustand'],
+            // antd: ['antd'],
+            '@ant-design/icons': ['@ant-design/icons'],
+            '@ant-design/x': ['@ant-design/x']
+            // '@mui/material': ['@mui/material']
+          }
+        }
+      }
+      // minify: false
+    },
     server: {
       proxy: {
         // string shorthand: http://localhost:5173/foo -> http://localhost:4567/foo
