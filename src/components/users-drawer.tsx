@@ -3,7 +3,7 @@ import { useChatUsersStore } from '@/store';
 import { Drawer } from 'antd';
 import { useEffect, useState } from 'react';
 
-function UsersDrawer({ children }) {
+function UsersDrawer({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const users = useChatUsersStore.use.users();
   const setUsers = useChatUsersStore.use.setUsers();
