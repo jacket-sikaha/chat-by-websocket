@@ -12,6 +12,7 @@ export default defineConfig(({ command, mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   return {
     plugins: [react(), visualizer({ gzipSize: true })],
+    base: mode === 'development' ? '/' : '/chat-by-websocket/',
     resolve: {
       // 配置别名 减少查找模块时间消耗
       alias: [
