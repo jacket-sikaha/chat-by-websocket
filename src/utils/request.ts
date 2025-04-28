@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 const request = axios.create({
-  //   baseURL: "https://127.0.0.1/api/",
+  baseURL: import.meta.env.DEV ? undefined : import.meta.env.VITE_ORIGIN_SERVER,
   timeout: 30 * 1000 // 30秒
   //   headers: { "X-Custom-Header": "foobar" },
 });
