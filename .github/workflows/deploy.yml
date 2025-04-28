@@ -45,6 +45,8 @@ jobs:
 
       - name: Build
         run: pnpm build
+        env:
+          VITE_ORIGIN_SERVER: ${{ env.VITE_ORIGIN_SERVER }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v5
