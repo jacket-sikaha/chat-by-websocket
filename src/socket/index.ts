@@ -2,7 +2,9 @@ import { useLayoutEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
 import { MessageBody, useChatMessageStore, useChatUsersStore } from '../store';
 
-export const url = import.meta.env.DEV ? 'http://192.168.9.46:3000' : undefined;
+export const url = import.meta.env.DEV
+  ? 'http://192.168.9.46:3000'
+  : import.meta.env.VITE_ORIGIN_SERVER;
 
 console.log('url:', import.meta.env.VITE_ORIGIN_SERVER);
 export const socket = io(url, {
