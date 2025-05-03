@@ -6,6 +6,7 @@ export const downloadFileReq = (userId: string, fid: string): Promise<Blob> => {
     `/api/share-file/download-stream`,
     { userId, fid },
     {
+      timeout: 300 * 1000,
       responseType: 'blob'
     }
   );
@@ -24,6 +25,7 @@ export const customUploadFileReq = async (options: any, userId: string) => {
   try {
     // 发送上传请求
     response = await request.post('/api/share-file/upload', formData, {
+      timeout: 300 * 1000,
       cancelToken: source.token,
       onUploadProgress: (progressEvent) => {
         if (progressEvent.total) {

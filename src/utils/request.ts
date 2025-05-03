@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const request = axios.create({
   baseURL: import.meta.env.DEV ? undefined : import.meta.env.VITE_ORIGIN_SERVER,
-  timeout: 30 * 1000 // 30秒
+  timeout: 10 * 1000 // 10秒
   //   headers: { "X-Custom-Header": "foobar" },
 });
 
