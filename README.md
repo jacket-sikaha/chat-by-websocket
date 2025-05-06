@@ -2,9 +2,9 @@
 
 #### demo
 
-http://xhx.huage.eu.org:8093/
+https://ws.lee-sikaha.cloudns.ch
 
-接下来新目标，将重构一下前端页面。。。
+- 文件上传最大支持500M
 
 ---
 
@@ -23,13 +23,13 @@ multer([官网中文 API](https://github.com/expressjs/multer/blob/master/doc/RE
 ```js
 //默认情况(响应头不调整的情况)
 //相当于跳转，但实际是返回资源给浏览器显示
-res.sendFile(__dirname + "/index.html");
+res.sendFile(__dirname + '/index.html');
 //区分
 //下载所需响应头
-res.setHeader("Content-type", "application/octet-stream");
+res.setHeader('Content-type', 'application/octet-stream');
 //！！！响应头里不允许带中文
-res.setHeader("Content-Disposition", `attachment;filename=asd.jpg`);
-res.sendFile(__dirname + "/uploads/QQ图片20200621185630.jpg");
+res.setHeader('Content-Disposition', `attachment;filename=asd.jpg`);
+res.sendFile(__dirname + '/uploads/QQ图片20200621185630.jpg');
 ```
 
 [下载响应头说明补充链接](https://cloud.tencent.com/developer/article/1417956#:~:text=http%20%E5%8D%8F%E8%AE%AE%E5%AE%9E%E7%8E%B0%E6%96%87%E4%BB%B6%E4%B8%8B%E8%BD%BD%E6%97%B6%EF%BC%8C%E9%9C%80%E8%A6%81%E5%9C%A8%20%E6%9C%8D%E5%8A%A1%E5%99%A8%20%E8%AE%BE%E7%BD%AE%E5%A5%BD%E7%9B%B8%E5%85%B3%E5%93%8D%E5%BA%94%E5%A4%B4%EF%BC%8C%E5%B9%B6%E4%BD%BF%E7%94%A8%E4%BA%8C%E8%BF%9B%E5%88%B6%E4%BC%A0%E8%BE%93%E6%96%87%E4%BB%B6%E6%95%B0%E6%8D%AE%EF%BC%8C%E8%80%8C%E5%AE%A2%E6%88%B7%E7%AB%AF%EF%BC%88%E6%B5%8F%E8%A7%88%E5%99%A8%EF%BC%89%E4%BC%9A%E6%A0%B9%E6%8D%AE%E5%93%8D%E5%BA%94%E5%A4%B4%E6%8E%A5%E6%94%B6%E6%96%87%E4%BB%B6%E6%95%B0%E6%8D%AE%E3%80%82%20%E5%9C%A8,http%20%E5%93%8D%E5%BA%94%E6%8A%A5%E6%96%87%E4%B8%AD%EF%BC%8C%20Content-type%20%E5%92%8C%20Content-Disposition%20%E6%98%AF%E6%9C%80%E5%85%B3%E9%94%AE%E7%9A%84%E4%B8%A4%E4%B8%AA%E5%93%8D%E5%BA%94%E5%A4%B4%E3%80%82)
@@ -80,7 +80,6 @@ https://www.bilibili.com/video/BV1RK4y147uV?share_source=copy_web
 
 于是直接修改配置：
 
-- maxHttpBufferSize: 50000000,//50M
-  pingTimeout: 30000,//单次 socket 消息发送的最大连接时长，超过就重连
+- maxHttpBufferSize: 50000000,//50M pingTimeout: 30000,//单次 socket 消息发送的最大连接时长，超过就重连
 
   https://socket.io/docs/v4/server-options/#transports
