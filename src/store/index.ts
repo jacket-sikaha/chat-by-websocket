@@ -20,6 +20,7 @@ export type MessageBody = {
 
 interface ChatUsers {
   users: string[];
+  online_users: string[];
   me: string;
   setUsers: (users: string[]) => void;
   setMe: (user: string) => void;
@@ -32,10 +33,12 @@ interface ChatMessage {
 
 const useChatUsersStoreBase = create<ChatUsers>((set) => ({
   users: [],
+  online_users: [],
   me: '',
-  setUsers: (users) =>
-    set(() => {
-      return { users };
+  setUsers: (value) =>
+    set(({ users }) => {
+      const tmp = new Set([...users, ...value]);
+      return { online_users: value, users: Array.from(tmp) };
     }),
   setMe: (user) =>
     set(() => ({

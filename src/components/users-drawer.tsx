@@ -5,7 +5,7 @@ import { useEffect, useState } from 'react';
 
 function UsersDrawer({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
-  const users = useChatUsersStore.use.users();
+  const online_users = useChatUsersStore.use.online_users();
   const setUsers = useChatUsersStore.use.setUsers();
   const me = useChatUsersStore.use.me();
   const showDrawer = () => {
@@ -21,12 +21,13 @@ function UsersDrawer({ children }: { children: React.ReactNode }) {
       setUsers(val);
     });
   }, [open]);
+
   return (
     <>
       <div onClick={showDrawer}> {children} </div>
       <Drawer title="Online Users" onClose={onClose} open={open}>
         <div className="flex flex-col gap-5">
-          {users.map((item) => {
+          {online_users.map((item) => {
             return (
               <div key={item}>
                 <div className="relative flex w-80 items-center rounded-md bg-white p-5 shadow-md">
