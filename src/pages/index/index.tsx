@@ -65,7 +65,7 @@ const ChatPage: React.FC = () => {
   }, [me, users]);
 
   const bubbleListItem = useMemo(() => {
-    return messages.map((item, i) => {
+    return messages.map((item) => {
       const { type, source, from, id } = item;
       const k = ChatMsgType[type] as keyof typeof ChatMsgType;
       return {
