@@ -31,6 +31,7 @@ const ChatPage: React.FC = () => {
   const me = useChatUsersStore.use.me();
   const users = useChatUsersStore.use.users();
   const messages = useChatMessageStore.use.messages();
+  const downloadFile = useChatMessageStore.use.downloadFile();
 
   const roles: GetProp<typeof Bubble.List, 'roles'> = useMemo(() => {
     return Object.assign(
@@ -39,21 +40,25 @@ const ChatPage: React.FC = () => {
         let avatar = u.slice(0, 2);
         return {
           [`${u}-str`]: strBubbleRoleConstructs(u === me, avatar),
-          [`${u}-file`]: fileBubbleRoleConstructs(u === me, avatar, (items: any) => (
-            <Flex vertical gap="middle">
-              {(items as MessageBody['file'])?.map((item) => (
-                <div
-                  key={item.uid}
-                  onClick={() => {
-                    console.log('findDOMNode', item);
-                    onDownload(me, item.fid, item.type, item.name);
-                  }}
-                >
-                  <Attachments.FileCard item={item} />
-                </div>
-              ))}
-            </Flex>
-          ))
+          [`${u}-file`]: fileBubbleRoleConstructs(u === me, avatar, ({ data, id }: any) => {
+            return (
+              <Flex vertical gap="middle">
+                {(data as MessageBody['file'])?.map((item) => (
+                  <div
+                    key={item.uid}
+                    onClick={async () => {
+                      console.log('findDOMNode', item);
+                      // onDownload(me, item.fid, item.type, item.name);
+                      const res = await downloadFile(id, me, item);
+                      res && downloadBlob(res as Blob, item.type, item.fileName);
+                    }}
+                  >
+                    <Attachments.FileCard item={item} />
+                  </div>
+                ))}
+              </Flex>
+            );
+          })
         };
       })
     );
@@ -61,12 +66,15 @@ const ChatPage: React.FC = () => {
 
   const bubbleListItem = useMemo(() => {
     return messages.map((item, i) => {
-      const { type, source, from } = item;
+      const { type, source, from, id } = item;
       const k = ChatMsgType[type] as keyof typeof ChatMsgType;
       return {
-        key: i,
+        key: id,
         role: `${source ? me : from}-${k}`,
-        content: item[k]
+        content: {
+          id,
+          data: item[k]
+        }
       };
     });
   }, [messages]);
@@ -79,6 +87,7 @@ const ChatPage: React.FC = () => {
   const onSubmit = (nextContent: string) => {
     if (!nextContent) return;
     sendMsg({
+      id: Math.random(),
       type: ChatMsgType.str,
       str: nextContent,
       from: me
@@ -93,6 +102,7 @@ const ChatPage: React.FC = () => {
         return obj;
       });
       sendMsg({
+        id: Math.random(),
         type: ChatMsgType.file,
         file: tmp as MessageBody['file'],
         from: me

@@ -1,3 +1,4 @@
+import request from '@/utils/request';
 import { UploadFile } from 'antd';
 import { produce } from 'immer';
 import { create } from 'zustand';
@@ -10,6 +11,7 @@ export enum ChatMsgType {
 }
 
 export type MessageBody = {
+  id: string | number;
   type: ChatMsgType;
   str?: string;
   file?: (UploadFile & { fid: string })[];
@@ -29,6 +31,11 @@ interface ChatUsers {
 interface ChatMessage {
   messages: MessageBody[];
   handleMsgReceived: (msg: MessageBody) => void;
+  downloadFile: (
+    messageId: string,
+    userId: string,
+    file: UploadFile & { fid: string }
+  ) => Promise<Blob | undefined>;
 }
 
 const useChatUsersStoreBase = create<ChatUsers>((set) => ({
@@ -55,6 +62,43 @@ const useChatMessageStoreBase = create<ChatMessage>((set) => ({
         state.messages.push(message);
       })
     );
+  },
+  downloadFile: async (messageId, userId, file) => {
+    try {
+      const data = await request.post(
+        `/api/share-file/download-stream`,
+        { userId, fid: file.fid },
+        {
+          timeout: 300 * 1000,
+          responseType: 'blob',
+          onDownloadProgress(progressEvent) {
+            if (file.size && progressEvent.loaded && progressEvent.loaded > 0) {
+              const percent = Math.round((progressEvent.loaded / file.size) * 100);
+              set(
+                produce((state: ChatMessage) => {
+                  const target = state.messages.find(({ id }) => id === messageId);
+                  if (target?.file) {
+                    const obj = target.file.find((f) => f.fid === file.fid);
+                    if (obj) {
+                      if (file.size === progressEvent.loaded) {
+                        obj.status = 'done';
+                        return;
+                      }
+                      obj.status = 'uploading';
+                      obj.percent = percent;
+                    }
+                  }
+                })
+              );
+            }
+          }
+        }
+      );
+      return data as unknown as Blob;
+    } catch (error) {
+      console.log(error);
+      return;
+    }
   }
 }));
 
