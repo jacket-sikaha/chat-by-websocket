@@ -28,6 +28,7 @@ const ChatPage: React.FC = () => {
   // ==================== State ====================
   const { loading, sendMsg } = useSocketService();
   const axiosCancel = useRef(new Map<string, AbortController>());
+  const downloadingFile = useRef(new Set<string>());
   const me = useChatUsersStore.use.me();
   const users = useChatUsersStore.use.users();
   const messages = useChatMessageStore.use.messages();
@@ -49,7 +50,10 @@ const ChatPage: React.FC = () => {
                     onClick={async () => {
                       console.log('findDOMNode', item);
                       // onDownload(me, item.fid, item.type, item.name);
+                      if (downloadingFile.current.has(item.uid)) return;
+                      downloadingFile.current.add(item.uid);
                       const res = await downloadFile(id, me, item);
+                      downloadingFile.current.delete(item.uid);
                       res && downloadBlob(res as Blob, item.type, item.fileName);
                     }}
                   >

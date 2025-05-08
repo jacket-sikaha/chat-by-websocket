@@ -2,17 +2,19 @@ import { ChatMsgType, useChatMessageStore } from '@/store';
 import { DownloadOutlined } from '@ant-design/icons';
 import { Attachments } from '@ant-design/x';
 import { Typography } from 'antd';
+import { useRef } from 'react';
 import { onDownload } from '../index';
 
 function History() {
   const messages = useChatMessageStore.use.messages();
+  const downloadingFile = useRef(new Set<string | number>());
 
   return (
     <div className="mx-auto flex h-full max-w-2xl flex-col items-center gap-3 p-3">
       {messages
         .filter(({ source }) => !!!source)
         .map((item, index) => {
-          const { type, from } = item;
+          const { id, type, from } = item;
           const k = ChatMsgType[type] as keyof typeof ChatMsgType;
           const content = item[k];
 
@@ -48,10 +50,14 @@ function History() {
                     {Array.isArray(content) && (
                       <DownloadOutlined
                         className="rounded-full bg-[#a2d5f2] p-1.5 text-lg text-white"
-                        onClick={() => {
-                          Promise.all(
-                            content.map((file) => onDownload(from, file.fid, file.type, file.name))
+                        onClick={async () => {
+                          if (downloadingFile.current.has(id)) return;
+                          downloadingFile.current.add(id);
+                          const actions = content.map((file) =>
+                            onDownload(from, file.fid, file.type, file.name)
                           );
+                          await Promise.all(actions);
+                          downloadingFile.current.delete(id);
                         }}
                       />
                     )}
