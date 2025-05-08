@@ -31,3 +31,27 @@ export function downloadBlob(
   URL.revokeObjectURL(url);
   document.body.removeChild(link);
 }
+
+export function formatBandwidth(valueBps: number) {
+  if (valueBps >= 1e6) {
+    // 1,000,000 B/s及以上转换为MB/s
+    const valueMB = valueBps / 1e6;
+    return `${valueMB.toFixed(2).replace(/\.?0+$/, '')} MB/s`;
+  } else if (valueBps >= 1000) {
+    // 1,000 B/s及以上转换为KB/s
+    const valueKB = valueBps / 1000;
+    return `${valueKB.toFixed(2).replace(/\.?0+$/, '')} KB/s`;
+  } else {
+    // 小于1,000 B/s保持原单位
+    return `${Math.round(valueBps)} B/s`;
+  }
+}
+
+export const formatSpeed = (bytesPerSecond: number) => {
+  if (bytesPerSecond >= 1024 * 1024) {
+    return `${(bytesPerSecond / (1024 * 1024)).toFixed(2)} MB/s`;
+  } else if (bytesPerSecond >= 1024) {
+    return `${(bytesPerSecond / 1024).toFixed(2)} KB/s`;
+  }
+  return `${bytesPerSecond} B/s`;
+};

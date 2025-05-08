@@ -1,5 +1,5 @@
 import { Attachments, Bubble, Sender } from '@ant-design/x';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 
 import { downloadBlob } from '@/utils';
 import { fileBubbleRoleConstructs, strBubbleRoleConstructs } from '@/utils/bubble-role';
@@ -27,7 +27,7 @@ export const onDownload = async (
 const ChatPage: React.FC = () => {
   // ==================== State ====================
   const { loading, sendMsg } = useSocketService();
-
+  const axiosCancel = useRef(new Map<string, AbortController>());
   const me = useChatUsersStore.use.me();
   const users = useChatUsersStore.use.users();
   const messages = useChatMessageStore.use.messages();
@@ -97,7 +97,7 @@ const ChatPage: React.FC = () => {
 
   const handleFileChange: GetProp<typeof Attachments, 'onChange'> = (info) => {
     const flag = info.fileList.every((file) => file.status === 'done');
-    if (flag) {
+    if (flag && info.fileList.length > 0) {
       const tmp = info.fileList.map(({ xhr, response, originFileObj, ...obj }) => {
         return obj;
       });
@@ -107,8 +107,10 @@ const ChatPage: React.FC = () => {
         file: tmp as MessageBody['file'],
         from: me
       });
-      setHeaderOpen(false);
-      setAttachedFiles([]);
+      setTimeout(() => {
+        setAttachedFiles([]);
+        setHeaderOpen(false);
+      }, 1000);
       return;
     }
     setAttachedFiles(info.fileList);
@@ -138,8 +140,13 @@ const ChatPage: React.FC = () => {
         items={attachedFiles}
         onChange={handleFileChange}
         customRequest={async (options) => {
-          const res = await customUploadFileReq(options, me);
-          console.log('res========:', res, attachedFiles);
+          const cancel = customUploadFileReq(options, me);
+          axiosCancel.current.set(options.file.uid, cancel);
+        }}
+        onRemove={(file) => {
+          setAttachedFiles((prev) => prev.filter((item) => item.uid !== file.uid));
+          axiosCancel.current.get(file.uid)?.abort();
+          axiosCancel.current.delete(file.uid);
         }}
         placeholder={(type) =>
           type === 'drop'
