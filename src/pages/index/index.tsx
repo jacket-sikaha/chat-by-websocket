@@ -4,7 +4,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { downloadBlob } from '@/utils';
 import { fileBubbleRoleConstructs, strBubbleRoleConstructs } from '@/utils/bubble-role';
 import { CloudUploadOutlined, PaperClipOutlined } from '@ant-design/icons';
-import { Badge, Button, Flex, type GetProp } from 'antd';
+import { Badge, Button, Flex, UploadFile, type GetProp } from 'antd';
 import { customUploadFileReq, downloadFileReq } from '../../services/file';
 import { useSocketService } from '../../socket';
 import { ChatMsgType, MessageBody, useChatMessageStore, useChatUsersStore } from '../../store';
@@ -140,8 +140,9 @@ const ChatPage: React.FC = () => {
         items={attachedFiles}
         onChange={handleFileChange}
         customRequest={async (options) => {
+          const file = options.file as UploadFile;
           const cancel = customUploadFileReq(options, me);
-          axiosCancel.current.set(options.file.uid, cancel);
+          axiosCancel.current.set(file.uid, cancel);
         }}
         onRemove={(file) => {
           setAttachedFiles((prev) => prev.filter((item) => item.uid !== file.uid));

@@ -76,6 +76,7 @@ export const customUploadFileReq = (
     const timeDiff = currentTime - lastTime;
     const dataDiff = loaded - lastLoaded;
     const rate = (dataDiff / timeDiff) * 1000; // 字节/秒
+    rate;
     // console.log(`速率：${(rate / 1024).toFixed(2)} KB/s`);
     // console.log(`速率：${formatSpeed(rate ?? 0)}  `);
     // 更新记录值
@@ -84,7 +85,7 @@ export const customUploadFileReq = (
   })
     .then((res) => {
       if (res?.data?.id) {
-        file.fid = res.data.id;
+        (file as any).fid = res.data.id;
       }
       // 手动触发成功状态（适配 antd 的 Upload 组件）
       onSuccess?.(res, res.request);
