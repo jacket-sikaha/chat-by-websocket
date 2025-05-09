@@ -101,8 +101,8 @@ const ChatPage: React.FC = () => {
 
   const handleFileChange: GetProp<typeof Attachments, 'onChange'> = (info) => {
     const flag = info.fileList.every((file) => file.status === 'done' || file.status === 'error');
-    if (flag && info.fileList.length > 0) {
-      const done = info.fileList.filter((file) => file.status === 'done');
+    const done = info.fileList.filter((file) => file.status === 'done');
+    if (flag && done.length > 0) {
       const tmp = done.map(({ xhr, response, originFileObj, ...obj }) => {
         return obj;
       });
