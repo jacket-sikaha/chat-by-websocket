@@ -100,24 +100,24 @@ const ChatPage: React.FC = () => {
   };
 
   const handleFileChange: GetProp<typeof Attachments, 'onChange'> = (info) => {
-    const flag = info.fileList.every((file) => file.status === 'done');
-    if (flag && info.fileList.length > 0) {
-      const tmp = info.fileList.map(({ xhr, response, originFileObj, ...obj }) => {
-        return obj;
-      });
-      sendMsg({
-        id: Math.random(),
-        type: ChatMsgType.file,
-        file: tmp as MessageBody['file'],
-        from: me
-      });
-      setTimeout(() => {
-        setAttachedFiles([]);
-        setHeaderOpen(false);
-      }, 1000);
+    const upload_list = info.fileList.filter((file) => file.status === 'done');
+    if (upload_list.length === 0) {
+      setAttachedFiles(info.fileList);
       return;
     }
-    setAttachedFiles(info.fileList);
+    const tmp = upload_list.map(({ xhr, response, originFileObj, ...obj }) => {
+      return obj;
+    });
+    sendMsg({
+      id: Math.random(),
+      type: ChatMsgType.file,
+      file: tmp as MessageBody['file'],
+      from: me
+    });
+    setTimeout(() => {
+      setAttachedFiles(info.fileList.filter((file) => file.status !== 'done'));
+      setHeaderOpen(false);
+    }, 1000);
   };
 
   const attachmentsNode = (
