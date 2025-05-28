@@ -18,18 +18,15 @@ type MenuItem = Required<MenuProps>['items'][number];
 function App() {
   const items: MenuItem[] = useMemo(() => {
     // item is T 明确告知编译器过滤后的类型
-    const pathList = DefaultRoutes[0].children.filter(
-      (x): x is { path: string; name: string; element: JSX.Element; index?: undefined } =>
-        !!x?.path && !!x?.name
-    );
+    const pathList = DefaultRoutes[0].children;
 
-    return pathList.map(({ path, name }) => ({
+    return pathList.map(({ path, name, index }) => ({
       label: (
-        <Link key={path} to={path}>
+        <Link key={path} to={index || !path ? '/' : path}>
           {name}
         </Link>
       ),
-      key: path
+      key: path + name
     }));
   }, []);
 
