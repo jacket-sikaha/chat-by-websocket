@@ -23,7 +23,7 @@ function History() {
               key={index}
               className="service-card group relative w-full shrink-0 cursor-pointer snap-start overflow-hidden rounded-lg bg-[#fafafa] p-6 shadow-xl transition-all duration-300 hover:bg-[#07689f]"
             >
-              <span className="absolute right-0 top-0 z-0 size-10 transform rounded-full bg-gradient-to-r from-purple-500 to-blue-500 opacity-75 transition-all duration-500 group-hover:scale-[20]" />
+              <span className="absolute right-0 top-0 z-0 size-10 transform rounded-full bg-gradient-to-r from-purple-500 to-blue-500 opacity-75 transition-all duration-500 group-hover:scale-[3]" />
               <span className="absolute right-0 top-0 z-10 flex size-10 items-center justify-center text-lg text-white">
                 {index + 1}
               </span>
