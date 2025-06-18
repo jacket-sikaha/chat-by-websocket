@@ -12,19 +12,15 @@ export const socket = io(url, {
 
 export const useSocketService = () => {
   const { message, modal, notification } = App.useApp();
-  const connect = useRef(false);
   const [connecting, setConnecting] = useState(false);
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
   const attempt = useRef(0);
   const [loading, setLoading] = useState(false);
   const timer = useRef<NodeJS.Timeout>();
-  const me = useChatUsersStore.use.me();
   const setMe = useChatUsersStore.use.setMe();
   const setUsers = useChatUsersStore.use.setUsers();
   const addMsg = useChatMessageStore.use.handleMsgReceived();
   const onConnect = async () => {
-    console.log('me:', me, reconnectAttempt);
-    connect.current = true;
     setConnecting(() => false);
     // setReconnectAttempt里面的回调函数执行还是属于异步范畴
     // 1. 用Promise异步转同步，resolve传递最新值
@@ -43,9 +39,9 @@ export const useSocketService = () => {
     setReconnectAttempt(() => 0);
     socket.id && setMe(socket.id);
     console.log('connected', socket.id);
+    console.log(useChatUsersStore.getState());
   };
   const onDisconnect = (reason: string, description: any) => {
-    connect.current = false;
     modal.error({
       title: '连接断开',
       content: reason
@@ -72,7 +68,7 @@ export const useSocketService = () => {
   };
 
   const sendMsg = (data: MessageBody) => {
-    if (!connect.current) {
+    if (!socket.connected) {
       message.error('socket 未连接');
       return;
     }
@@ -101,8 +97,10 @@ export const useSocketService = () => {
   }, [reconnectAttempt]);
 
   useLayoutEffect(() => {
-    setConnecting(() => true);
-    socket.connect();
+    if (!socket.connected) {
+      setConnecting(() => true);
+      socket.connect();
+    }
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('msg', handleMsgReceived);
