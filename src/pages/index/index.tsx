@@ -4,7 +4,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { downloadBlob } from '@/utils';
 import { fileBubbleRoleConstructs, strBubbleRoleConstructs } from '@/utils/bubble-role';
 import { CloudUploadOutlined, PaperClipOutlined } from '@ant-design/icons';
-import { Badge, Button, Flex, UploadFile, type GetProp } from 'antd';
+import { Badge, Button, Flex, Spin, UploadFile, type GetProp } from 'antd';
 import { customUploadFileReq, downloadFileReq } from '../../services/file';
 import { useSocketService } from '../../socket';
 import { ChatMsgType, MessageBody, useChatMessageStore, useChatUsersStore } from '../../store';
@@ -26,7 +26,7 @@ export const onDownload = async (
 
 const ChatPage: React.FC = () => {
   // ==================== State ====================
-  const { loading, sendMsg } = useSocketService();
+  const { loading, connecting, reconnectAttempt, sendMsg } = useSocketService();
   const axiosCancel = useRef(new Map<string, AbortController>());
   const downloadingFile = useRef(new Set<string>());
   const me = useChatUsersStore.use.me();
@@ -169,6 +169,17 @@ const ChatPage: React.FC = () => {
 
   return (
     <div className="mx-auto flex h-full max-w-3xl flex-col gap-3 bg-white p-6">
+      <Spin
+        spinning={connecting || !!reconnectAttempt}
+        tip={
+          <div className="text-base">
+            {reconnectAttempt ? `尝试第${reconnectAttempt}次重连...` : '正在连接中...'}
+          </div>
+        }
+        delay={500}
+        size="large"
+        fullscreen
+      />
       {/* 🌟 消息列表 */}
       <Bubble.List className="flex-1" items={bubbleListItem} roles={roles} />
 

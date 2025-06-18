@@ -1,5 +1,5 @@
 import { RedditOutlined } from '@ant-design/icons';
-import { Layout, Menu, MenuProps } from 'antd';
+import { App as AntdApp, Layout, Menu, MenuProps } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Link, Outlet } from 'react-router-dom';
@@ -38,18 +38,20 @@ function App() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <Layout className="h-screen">
-        <Header className="flex items-center gap-3 bg-white">
-          <RedditOutlined className="text-3xl" />
-          <Menu mode="horizontal" items={items} style={{ flex: 1, minWidth: 0 }} />
-          <UsersDrawer>
-            <OnlineInfoIcon />
-          </UsersDrawer>
-        </Header>
-        <Content>
-          <Outlet />
-        </Content>
-      </Layout>
+      <AntdApp>
+        <Layout className="h-screen">
+          <Header className="flex items-center gap-3 bg-white">
+            <RedditOutlined className="text-3xl" />
+            <Menu mode="horizontal" items={items} style={{ flex: 1, minWidth: 0 }} />
+            <UsersDrawer>
+              <OnlineInfoIcon />
+            </UsersDrawer>
+          </Header>
+          <Content>
+            <Outlet />
+          </Content>
+        </Layout>
+      </AntdApp>
     </QueryClientProvider>
   );
 }
