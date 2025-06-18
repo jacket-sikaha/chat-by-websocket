@@ -38,7 +38,6 @@ export const customUploadFileReq = (
   options: Parameters<NonNullable<AttachmentsProps['customRequest']>>[0],
   userId: string
 ) => {
-  let response;
   const { file, onProgress, onSuccess, onError } = options;
   // 创建取消令牌（用于中断上传）
   const controller = new AbortController();
@@ -47,7 +46,7 @@ export const customUploadFileReq = (
   let lastTime = Date.now();
 
   // 发送上传请求
-  // response = await request.post('/api1/share-file/upload', formData, {
+  // let response = await request.post('/api1/share-file/upload', formData, {
   //   timeout: 300 * 1000,
   //   signal: controller?.signal,
   //   onUploadProgress: (progressEvent) => {
@@ -93,9 +92,9 @@ export const customUploadFileReq = (
     .catch((error) => {
       // 错误处理
       if (axios.isCancel(error)) {
-        onError?.(new Error('用户取消上传'), response);
+        onError?.(new Error('用户取消上传'));
       } else {
-        onError?.(new Error(error.code), response);
+        onError?.(new Error(error.code));
       }
     });
 

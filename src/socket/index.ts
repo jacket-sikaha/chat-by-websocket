@@ -11,7 +11,7 @@ export const socket = io(url, {
 });
 
 export const useSocketService = () => {
-  const { message, modal, notification } = App.useApp();
+  const { message, modal } = App.useApp();
   const [connecting, setConnecting] = useState(false);
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
   const attempt = useRef(0);
