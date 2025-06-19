@@ -20,6 +20,10 @@ export const useSocketService = () => {
   const setSocketIds = useChatUsersStore.use.setSocketIds();
   const setUsers = useChatUsersStore.use.setUsers();
   const addMsg = useChatMessageStore.use.handleMsgReceived();
+  const synchronizeOnlinePeople = (val: string[]) => {
+    setUsers(val);
+  };
+
   const onConnect = async () => {
     setConnecting(() => false);
     // setReconnectAttempt里面的回调函数执行还是属于异步范畴
@@ -38,6 +42,8 @@ export const useSocketService = () => {
     if (attempt.current) message.success('重连成功');
     setReconnectAttempt(() => 0);
     socket.id && setSocketIds(socket.id);
+    // 连接成功后全部在线用户同步在线的socket id
+    socket.emit('connected-users', { broadcast: true }, synchronizeOnlinePeople);
     console.log('connected', socket.id);
     console.log(useChatUsersStore.getState());
   };
@@ -82,13 +88,8 @@ export const useSocketService = () => {
   };
 
   const pollingSetUsers = () => {
-    socket.emit('connected-users', '', (val: string[]) => {
-      setUsers(val);
-    });
     timer.current = setInterval(() => {
-      socket.emit('connected-users', '', (val: string[]) => {
-        setUsers(val);
-      });
+      socket.emit('connected-users', '', synchronizeOnlinePeople);
     }, 1000 * 10);
   };
 
@@ -104,6 +105,7 @@ export const useSocketService = () => {
     socket.on('connect', onConnect);
     socket.on('disconnect', onDisconnect);
     socket.on('msg', handleMsgReceived);
+    socket.on('connected-users', synchronizeOnlinePeople);
     socket.io.on('error', onError);
     socket.io.on('reconnect_attempt', onReconnectAttempt);
 
@@ -112,6 +114,7 @@ export const useSocketService = () => {
       socket.off('connect', onConnect);
       socket.off('disconnect', onDisconnect);
       socket.off('msg', handleMsgReceived);
+      socket.off('connected-users', synchronizeOnlinePeople);
       socket.io.off('error', onError);
       socket.io.off('reconnect_attempt', onReconnectAttempt);
       clearInterval(timer.current);
