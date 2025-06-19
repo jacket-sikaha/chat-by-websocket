@@ -7,7 +7,9 @@ function UsersDrawer({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
   const online_users = useChatUsersStore.use.online_users();
   const setUsers = useChatUsersStore.use.setUsers();
-  const me = useChatUsersStore.use.me();
+  const socketIds = useChatUsersStore.use.socketIds();
+  const me = socketIds[socketIds.length - 1] ?? '';
+
   const showDrawer = () => {
     setOpen(true);
   };

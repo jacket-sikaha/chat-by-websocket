@@ -29,7 +29,9 @@ const ChatPage: React.FC = () => {
   const { loading, connecting, reconnectAttempt, sendMsg } = useSocketService();
   const axiosCancel = useRef(new Map<string, AbortController>());
   const downloadingFile = useRef(new Set<string>());
-  const me = useChatUsersStore.use.me();
+  const socketIds = useChatUsersStore.use.socketIds();
+  const me = socketIds[socketIds.length - 1] ?? '';
+  const uid = useChatUsersStore.use.id();
   const users = useChatUsersStore.use.users();
   const messages = useChatMessageStore.use.messages();
   const downloadFile = useChatMessageStore.use.downloadFile();
@@ -38,10 +40,14 @@ const ChatPage: React.FC = () => {
     return Object.assign(
       {},
       ...users.map((u) => {
-        let avatar = u.slice(0, 2);
+        // 使用临时uuid来判别是否是自己发的消息
+        // 避免重连时自己消息归类成他人消息
+        let isMe = socketIds.includes(u);
+        let avatar = isMe ? uid.slice(0, 2) : u.slice(0, 2);
+        let k = isMe ? uid : u;
         return {
-          [`${u}-str`]: strBubbleRoleConstructs(u === me, avatar),
-          [`${u}-file`]: fileBubbleRoleConstructs(u === me, avatar, ({ data, id }: any) => {
+          [`${k}-str`]: strBubbleRoleConstructs(isMe, avatar),
+          [`${k}-file`]: fileBubbleRoleConstructs(isMe, avatar, ({ data, id }: any) => {
             return (
               <Flex vertical gap="middle">
                 {(data as MessageBody['file'])?.map((item) => (
@@ -74,7 +80,7 @@ const ChatPage: React.FC = () => {
       const k = ChatMsgType[type] as keyof typeof ChatMsgType;
       return {
         key: id,
-        role: `${source ? me : from}-${k}`,
+        role: `${source ? uid : from}-${k}`, // 与roles里的消息key要对应
         content: {
           id,
           data: item[k]

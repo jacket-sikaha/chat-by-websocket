@@ -1,6 +1,7 @@
 import request from '@/utils/request';
 import { UploadFile } from 'antd';
 import { produce } from 'immer';
+import { v4 } from 'uuid';
 import { create } from 'zustand';
 import { createSelectors } from './utils';
 
@@ -23,9 +24,10 @@ export type MessageBody = {
 interface ChatUsers {
   users: string[];
   online_users: string[];
-  me: string;
+  id: string;
+  socketIds: string[];
   setUsers: (users: string[]) => void;
-  setMe: (user: string) => void;
+  setSocketIds: (user: string) => void;
 }
 
 interface ChatMessage {
@@ -41,16 +43,20 @@ interface ChatMessage {
 const useChatUsersStoreBase = create<ChatUsers>((set) => ({
   users: [],
   online_users: [],
-  me: '',
+  socketIds: [], // 记录每次连接或重连生成的id
+  id: v4(), // 记录当前用户的临时id
   setUsers: (value) =>
     set(({ users }) => {
       const tmp = new Set([...users, ...value]);
       return { online_users: value, users: Array.from(tmp) };
     }),
-  setMe: (user) =>
-    set(() => ({
-      me: user
-    }))
+  setSocketIds: (user) => {
+    set(
+      produce((state: ChatUsers) => {
+        state.socketIds.push(user);
+      })
+    );
+  }
 }));
 
 const useChatMessageStoreBase = create<ChatMessage>((set) => ({

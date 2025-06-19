@@ -17,7 +17,7 @@ export const useSocketService = () => {
   const attempt = useRef(0);
   const [loading, setLoading] = useState(false);
   const timer = useRef<NodeJS.Timeout>();
-  const setMe = useChatUsersStore.use.setMe();
+  const setSocketIds = useChatUsersStore.use.setSocketIds();
   const setUsers = useChatUsersStore.use.setUsers();
   const addMsg = useChatMessageStore.use.handleMsgReceived();
   const onConnect = async () => {
@@ -37,7 +37,7 @@ export const useSocketService = () => {
     // });
     if (attempt.current) message.success('重连成功');
     setReconnectAttempt(() => 0);
-    socket.id && setMe(socket.id);
+    socket.id && setSocketIds(socket.id);
     console.log('connected', socket.id);
     console.log(useChatUsersStore.getState());
   };
