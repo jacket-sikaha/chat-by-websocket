@@ -1,3 +1,4 @@
+import { useMessageSubscription } from '@/socket';
 import { ChatMsgType, useChatMessageStore } from '@/store';
 import { DownloadOutlined } from '@ant-design/icons';
 import { Attachments } from '@ant-design/x';
@@ -8,6 +9,7 @@ import { onDownload } from '../index';
 function History() {
   const messages = useChatMessageStore.use.messages();
   const downloadingFile = useRef(new Set<string | number>());
+  useMessageSubscription();
 
   return (
     <div className="mx-auto flex h-full max-w-2xl flex-col items-center gap-3 p-3">

@@ -123,3 +123,18 @@ export const useSocketService = () => {
 
   return { loading, connecting, reconnectAttempt, sendMsg };
 };
+
+export const useMessageSubscription = () => {
+  const addMsg = useChatMessageStore.use.handleMsgReceived();
+
+  useEffect(() => {
+    const handleMsgReceived = (message: MessageBody) => {
+      addMsg(message);
+    };
+
+    socket.on('msg', handleMsgReceived);
+    return () => {
+      socket.off('msg', handleMsgReceived);
+    };
+  }, []);
+};
