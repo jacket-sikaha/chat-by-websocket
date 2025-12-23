@@ -1,25 +1,28 @@
 import { useMessageSubscription } from '@/socket';
-import { ChatMsgType, useChatMessageStore } from '@/store';
+import { ChatMsgType, MessageBody, useChatMessageStore, useChatUsersStore } from '@/store';
+import { downloadBlob } from '@/utils';
 import { DownloadOutlined } from '@ant-design/icons';
-import { Attachments } from '@ant-design/x';
-import { Typography } from 'antd';
+import { FileCard } from '@ant-design/x';
+import { Progress, Typography } from 'antd';
 import { useRef } from 'react';
-import { onDownload } from '../index';
 
 function History() {
   const messages = useChatMessageStore.use.messages();
+  const downloadFile = useChatMessageStore.use.downloadFile();
   const downloadingFile = useRef(new Set<string | number>());
+  const socketIds = useChatUsersStore.use.socketIds();
+  const me = socketIds[socketIds.length - 1] ?? '';
   useMessageSubscription();
 
   return (
     <div className="mx-auto flex h-full max-w-2xl flex-col items-center gap-3 p-3">
       {messages
-        .filter(({ source }) => !!!source)
+        .filter(({ source }) => !source)
         .map((item, index) => {
           const { id, type, from } = item;
           const k = ChatMsgType[type] as keyof typeof ChatMsgType;
           const content = item[k];
-
+          const isFile = Array.isArray(content);
           return (
             <div
               key={index}
@@ -30,11 +33,20 @@ function History() {
                 {index + 1}
               </span>
               <div className="z-10 flex flex-col items-start gap-3 px-2">
-                {Array.isArray(content) ? (
+                {isFile ? (
                   <div className="flex flex-wrap items-center gap-2 text-black/80 group-hover:text-white">
-                    {content?.map((item) => (
+                    {(content as MessageBody['file'])?.map((item) => (
                       <div key={item.uid}>
-                        <Attachments.FileCard item={item} />
+                        <FileCard
+                          type="file"
+                          name={item.name}
+                          byte={item.size}
+                          description={
+                            item.status === 'uploading' ? (
+                              <Progress percent={item.percent} size="small" />
+                            ) : undefined
+                          }
+                        />
                       </div>
                     ))}
                   </div>
@@ -49,16 +61,19 @@ function History() {
 
                 <div className="flex w-full items-center justify-between">
                   <div>
-                    {Array.isArray(content) && (
+                    {isFile && (
                       <DownloadOutlined
                         className="rounded-full bg-[#a2d5f2] p-1.5 text-lg text-white"
                         onClick={async () => {
                           if (downloadingFile.current.has(id)) return;
                           downloadingFile.current.add(id);
-                          const actions = content.map((file) =>
-                            onDownload(from, file.fid, file.type, file.name)
+                          const actions = (content as MessageBody['file'])?.map((file) =>
+                            downloadFile(id.toString(), me, file).then((res) => {
+                              res &&
+                                downloadBlob(res as Blob, file.type, file.name ?? file.fileName);
+                            })
                           );
-                          await Promise.all(actions);
+                          actions && (await Promise.all(actions));
                           downloadingFile.current.delete(id);
                         }}
                       />

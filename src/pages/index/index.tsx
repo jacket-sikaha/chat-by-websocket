@@ -1,10 +1,11 @@
-import { Attachments, Bubble, Sender } from '@ant-design/x';
+import { Attachments, Bubble, BubbleItemType, Sender } from '@ant-design/x';
 import React, { useMemo, useRef, useState } from 'react';
 
 import { downloadBlob } from '@/utils';
-import { fileBubbleRoleConstructs, strBubbleRoleConstructs } from '@/utils/bubble-role';
+import { AllContentType2Render, commonRoleConfig } from '@/utils/bubble-config';
 import { CloudUploadOutlined, PaperClipOutlined } from '@ant-design/icons';
-import { Badge, Button, Flex, Spin, UploadFile, type GetProp } from 'antd';
+import { Badge, Button, Spin, UploadFile, type GetProp } from 'antd';
+import { v4 } from 'uuid';
 import { customUploadFileReq, downloadFileReq } from '../../services/file';
 import { useSocketService } from '../../socket';
 import { ChatMsgType, MessageBody, useChatMessageStore, useChatUsersStore } from '../../store';
@@ -18,7 +19,6 @@ export const onDownload = async (
   try {
     const res = await downloadFileReq(userId, fid);
     downloadBlob(res as Blob, type, filename);
-    console.log('res----------:', res);
   } catch (error) {
     console.log('error:', error);
   }
@@ -36,45 +36,24 @@ const ChatPage: React.FC = () => {
   const messages = useChatMessageStore.use.messages();
   const downloadFile = useChatMessageStore.use.downloadFile();
 
-  const roles: GetProp<typeof Bubble.List, 'roles'> = useMemo(() => {
+  const roles: GetProp<typeof Bubble.List, 'role'> = useMemo(() => {
     return Object.assign(
       {},
       ...users.map((u) => {
         // 使用临时uuid来判别是否是自己发的消息
         // 避免重连时自己消息归类成他人消息
-        let isMe = socketIds.includes(u);
-        let avatar = isMe ? uid.slice(0, 2) : u.slice(0, 2);
-        let k = isMe ? uid : u;
+        const isMe = socketIds.includes(u);
+        const avatar = isMe ? uid : u;
+        const k = isMe ? uid : u;
         return {
-          [`${k}-str`]: strBubbleRoleConstructs(isMe, avatar),
-          [`${k}-file`]: fileBubbleRoleConstructs(isMe, avatar, ({ data, id }: any) => {
-            return (
-              <Flex vertical gap="middle">
-                {(data as MessageBody['file'])?.map((item) => (
-                  <div
-                    key={item.uid}
-                    onClick={async () => {
-                      console.log('findDOMNode', item);
-                      // onDownload(me, item.fid, item.type, item.name);
-                      if (downloadingFile.current.has(item.uid)) return;
-                      downloadingFile.current.add(item.uid);
-                      const res = await downloadFile(id, me, item);
-                      downloadingFile.current.delete(item.uid);
-                      res && downloadBlob(res as Blob, item.type, item.fileName);
-                    }}
-                  >
-                    <Attachments.FileCard item={item} />
-                  </div>
-                ))}
-              </Flex>
-            );
-          })
+          [`${k}-str`]: commonRoleConfig(isMe, avatar),
+          [`${k}-file`]: { ...commonRoleConfig(isMe, avatar), variant: 'outlined' }
         };
       })
     );
   }, [me, users]);
 
-  const bubbleListItem = useMemo(() => {
+  const bubbleListItem: BubbleItemType[] = useMemo(() => {
     return messages.map((item) => {
       const { type, source, from, id } = item;
       const k = ChatMsgType[type] as keyof typeof ChatMsgType;
@@ -84,10 +63,19 @@ const ChatPage: React.FC = () => {
         content: {
           id,
           data: item[k]
-        }
+        },
+        contentRender: (c) =>
+          AllContentType2Render[type](c, async (item) => {
+            if (downloadingFile.current.has(item.uid)) return;
+            downloadingFile.current.add(item.uid);
+            const res = await downloadFile(id.toString(), me, item);
+            downloadingFile.current.delete(item.uid);
+            console.log('res----------:', item);
+            res && downloadBlob(res as Blob, item.type, item.name ?? item.fileName);
+          })
       };
     });
-  }, [messages]);
+  }, [me, messages, uid]);
 
   const [content, setContent] = useState('');
   const [headerOpen, setHeaderOpen] = useState(false);
@@ -97,7 +85,7 @@ const ChatPage: React.FC = () => {
   const onSubmit = (nextContent: string) => {
     if (!nextContent) return;
     sendMsg({
-      id: Math.random(),
+      id: v4(),
       type: ChatMsgType.str,
       str: nextContent,
       from: me
@@ -113,7 +101,7 @@ const ChatPage: React.FC = () => {
         return obj;
       });
       sendMsg({
-        id: Math.random(),
+        id: v4(),
         type: ChatMsgType.file,
         file: tmp as MessageBody['file'],
         from: me
@@ -187,7 +175,7 @@ const ChatPage: React.FC = () => {
         fullscreen
       />
       {/* 🌟 消息列表 */}
-      <Bubble.List className="flex-1" items={bubbleListItem} roles={roles} />
+      <Bubble.List className="flex-1" items={bubbleListItem} role={roles} />
 
       {/* 🌟 输入框 */}
       <Sender
