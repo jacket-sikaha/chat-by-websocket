@@ -1,5 +1,7 @@
 # 基于 websocket 设计一个文件传输助手网站
 
+[![DeepWiki Index](https://deepwiki.com/badge.svg)](https://deepwiki.com/jacket-sikaha/chat-by-websocket)
+
 #### demo
 
 https://ws.lee-sikaha.cloudns.ch
