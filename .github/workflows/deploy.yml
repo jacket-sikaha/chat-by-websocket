@@ -32,13 +32,21 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v2
-        with:
-          node-version: 18
-
       - name: Install pnpm
-        run: npm install -g pnpm
+        uses: pnpm/action-setup@v4 # 升级到最新稳定版
+        with:
+          version: 10  # 与 packageManager 不能同时设置
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          # 指定 node 版本缓存，避免重复下载
+          cache: 'pnpm'
+          # 明确指定缓存路径，提升缓存命中率
+          cache-dependency-path: |
+            **/pnpm-lock.yaml
+            package.json
 
       - name: Install dependencies with pnpm
         run: pnpm i
