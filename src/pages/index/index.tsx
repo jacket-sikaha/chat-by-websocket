@@ -1,14 +1,14 @@
-import { Attachments, Bubble, BubbleItemType, Sender } from '@ant-design/x';
+import { Attachments, Bubble, type BubbleItemType, Sender } from '@ant-design/x';
 import React, { useMemo, useRef, useState } from 'react';
 
 import { downloadBlob } from '@/utils';
 import { AllContentType2Render, commonRoleConfig } from '@/utils/bubble-config';
 import { CloudUploadOutlined, PaperClipOutlined } from '@ant-design/icons';
-import { Badge, Button, Spin, UploadFile, type GetProp } from 'antd';
+import { Badge, Button, type GetProp, Spin, type UploadFile } from 'antd';
 import { v4 } from 'uuid';
 import { customUploadFileReq, downloadFileReq } from '../../services/file';
 import { useSocketService } from '../../socket';
-import { ChatMsgType, MessageBody, useChatMessageStore, useChatUsersStore } from '../../store';
+import { ChatMsgType, type MessageBody, useChatMessageStore, useChatUsersStore } from '../../store';
 
 export const onDownload = async (
   userId: string,

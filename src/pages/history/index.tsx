@@ -1,5 +1,5 @@
 import { useMessageSubscription } from '@/socket';
-import { ChatMsgType, MessageBody, useChatMessageStore, useChatUsersStore } from '@/store';
+import { ChatMsgType, type MessageBody, useChatMessageStore, useChatUsersStore } from '@/store';
 import { downloadBlob } from '@/utils';
 import { DownloadOutlined } from '@ant-design/icons';
 import { FileCard } from '@ant-design/x';

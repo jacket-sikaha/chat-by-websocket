@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { AttachmentsProps } from '@ant-design/x';
+import { type AttachmentsProps } from '@ant-design/x';
 import axios from 'axios';
 
 export const downloadFileReq = (userId: string, fid: string): Promise<Blob> => {

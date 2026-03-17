@@ -1,5 +1,5 @@
 import request from '@/utils/request';
-import { UploadFile } from 'antd';
+import { type UploadFile } from 'antd';
 import { produce } from 'immer';
 import { v4 } from 'uuid';
 import { create } from 'zustand';

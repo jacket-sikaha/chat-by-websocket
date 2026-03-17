@@ -1,5 +1,5 @@
 import { RedditOutlined } from '@ant-design/icons';
-import { App as AntdApp, Layout, Menu, MenuProps } from 'antd';
+import { App as AntdApp, Layout, Menu, type MenuProps } from 'antd';
 import { useEffect, useMemo } from 'react';
 import { QueryClient, QueryClientProvider } from 'react-query';
 import { Link, Outlet } from 'react-router-dom';

@@ -1,8 +1,8 @@
-import { ChatMsgType, MessageBody } from '@/store';
+import { ChatMsgType, type MessageBody } from '@/store';
 import { UserOutlined } from '@ant-design/icons';
 import { FileCard } from '@ant-design/x';
-import { RoleProps } from '@ant-design/x/es/bubble/interface';
-import { Avatar, Flex, Progress, Tooltip, UploadFile } from 'antd';
+import type { RoleProps } from '@ant-design/x/es/bubble/interface';
+import { Avatar, Flex, Progress, Tooltip, type UploadFile } from 'antd';
 
 export const commonRoleConfig = (isYour: boolean, avatar?: string): RoleProps => {
   return {

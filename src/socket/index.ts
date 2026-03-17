@@ -1,7 +1,7 @@
 import { App } from 'antd';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { io } from 'socket.io-client';
-import { MessageBody, useChatMessageStore, useChatUsersStore } from '../store';
+import { type MessageBody, useChatMessageStore, useChatUsersStore } from '../store';
 
 export const url = import.meta.env.DEV ? undefined : import.meta.env.VITE_ORIGIN_SERVER;
 
@@ -16,7 +16,7 @@ export const useSocketService = () => {
   const [reconnectAttempt, setReconnectAttempt] = useState(0);
   const attempt = useRef(0);
   const [loading, setLoading] = useState(false);
-  const timer = useRef<NodeJS.Timeout>();
+  const timer = useRef<number>(0);
   const setSocketIds = useChatUsersStore.use.setSocketIds();
   const setUsers = useChatUsersStore.use.setUsers();
   const addMsg = useChatMessageStore.use.handleMsgReceived();
